@@ -95,22 +95,102 @@ def check_php() -> None:
         )
 
 
-def _download_file(url: str, dest: Path) -> None:
-    """Download with a real User-Agent — releases.wikimedia.org returns 403 for bare urllib."""
+UA = (
+    "ministation_wiki-setup/1.0 "
+    "(+https://wiki.ministation.ru; MediaWiki installer)"
+)
+
+
+def _which(cmd: str) -> str | None:
+    return shutil.which(cmd)
+
+
+def _download_with_curl(url: str, dest: Path) -> None:
+    cmd = [
+        "curl",
+        "-fsSL",
+        "--retry",
+        "5",
+        "--retry-all-errors",
+        "--connect-timeout",
+        "30",
+        "--max-time",
+        "600",
+        "-A",
+        UA,
+        "-o",
+        str(dest),
+        url,
+    ]
+    print("+", " ".join(cmd[:-1]), url)
+    subprocess.run(cmd, check=True)
+
+
+def _download_with_wget(url: str, dest: Path) -> None:
+    cmd = [
+        "wget",
+        "-q",
+        "--tries=5",
+        f"--user-agent={UA}",
+        "-O",
+        str(dest),
+        url,
+    ]
+    print("+", " ".join(cmd[:-1]), url)
+    subprocess.run(cmd, check=True)
+
+
+def _download_with_urllib(url: str, dest: Path) -> None:
     req = urllib.request.Request(
         url,
-        headers={
-            "User-Agent": (
-                "ministation_wiki-setup/1.0 "
-                "(+https://wiki.ministation.ru; MediaWiki installer) "
-                "Python-urllib"
-            ),
-            "Accept": "*/*",
-        },
+        headers={"User-Agent": UA, "Accept": "*/*"},
         method="GET",
     )
-    with urllib.request.urlopen(req, timeout=120) as resp, dest.open("wb") as out:
-        shutil.copyfileobj(resp, out)
+    with urllib.request.urlopen(req, timeout=600) as resp, dest.open("wb") as out:
+        expected = resp.headers.get("Content-Length")
+        expected_n = int(expected) if expected and expected.isdigit() else None
+        written = 0
+        while True:
+            chunk = resp.read(1024 * 256)
+            if not chunk:
+                break
+            out.write(chunk)
+            written += len(chunk)
+        if expected_n is not None and written != expected_n:
+            raise IOError(f"incomplete download: got {written} bytes, expected {expected_n}")
+
+
+def _download_file(url: str, dest: Path) -> None:
+    """Download large release tarball; prefer curl/wget (more reliable than urllib)."""
+    errors: list[str] = []
+    for name, fn in (
+        ("curl", _download_with_curl if _which("curl") else None),
+        ("wget", _download_with_wget if _which("wget") else None),
+        ("urllib", _download_with_urllib),
+    ):
+        if fn is None:
+            continue
+        try:
+            if dest.exists():
+                dest.unlink()
+            fn(url, dest)
+            if dest.stat().st_size < 1_000_000:
+                raise IOError(f"file too small ({dest.stat().st_size} bytes), likely truncated")
+            # Validate gzip/tar before callers extract
+            with tarfile.open(dest, "r:gz") as tf:
+                # force read of central metadata
+                _ = tf.getmembers()[:3]
+            print(f"Downloaded via {name}: {dest.stat().st_size} bytes")
+            return
+        except Exception as e:  # noqa: BLE001 — try next downloader
+            errors.append(f"{name}: {e}")
+            if dest.exists():
+                dest.unlink(missing_ok=True)
+    raise SystemExit(
+        "Failed to download MediaWiki:\n  - "
+        + "\n  - ".join(errors)
+        + f"\nManual: curl -fsSL -o /tmp/mw.tar.gz {url}"
+    )
 
 
 def download_mediawiki() -> None:
@@ -126,16 +206,16 @@ def download_mediawiki() -> None:
 
     with tempfile.TemporaryDirectory() as tmp:
         tgz = Path(tmp) / "mw.tar.gz"
-        try:
-            _download_file(url, tgz)
-        except urllib.error.HTTPError as e:
-            raise SystemExit(
-                f"Failed to download MediaWiki ({e.code} {e.reason}): {url}\n"
-                f"Try manually: curl -L -o /tmp/mw.tar.gz {url}"
-            ) from e
+        _download_file(url, tgz)
         with tarfile.open(tgz, "r:gz") as tf:
-            tf.extractall(tmp)
+            # Python 3.12+ data filter; ignore on older
+            try:
+                tf.extractall(tmp, filter="data")
+            except TypeError:
+                tf.extractall(tmp)
         extracted = next(Path(tmp).glob("mediawiki-*"))
+        if not (extracted / "includes" / "MediaWiki.php").is_file():
+            raise SystemExit(f"Extracted archive looks invalid: {extracted}")
         if MW_DIR.exists():
             shutil.rmtree(MW_DIR)
         shutil.move(str(extracted), str(MW_DIR))
