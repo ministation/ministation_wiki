@@ -9,10 +9,11 @@ def main(argv: list[str] | None = None) -> int:
         print(
             "Usage: python -m tools <command>\n\n"
             "Commands:\n"
-            "  setup    Download MediaWiki, create Postgres DB, install, link skin/ext\n"
-            "  db       Create wiki PostgreSQL role/database/schema only\n"
-            "  migrate  Import content/ru Markdown into MediaWiki\n"
-            "  start    Run MediaWiki (php -S) + sprite service (uvicorn)\n"
+            "  setup       Download MediaWiki, create Postgres DB, install, link skin/ext\n"
+            "  db          Create wiki PostgreSQL role/database/schema only\n"
+            "  extensions  Clone+enable official bundled extensions/skins for this MW version\n"
+            "  migrate     Import content/ru Markdown into MediaWiki\n"
+            "  start       Run MediaWiki (php -S) + sprite service (uvicorn)\n"
         )
         return 0
 
@@ -25,6 +26,10 @@ def main(argv: list[str] | None = None) -> int:
         from tools.db import main as db_main
 
         return db_main(rest)
+    if cmd == "extensions":
+        from tools.extensions import main as extensions_main
+
+        return extensions_main(rest)
     if cmd == "migrate":
         from tools.migrate import main as migrate_main
 

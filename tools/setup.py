@@ -484,6 +484,12 @@ $wgMainPage = 'Main Page';
 
 # Prefer UTF-8 / Russian search niceties
 $wgCapitalLinks = true;
+
+# BEGIN ministation_bundled
+if ( is_file( __DIR__ . '/LocalSettings.bundled.php' ) ) {{
+    require_once __DIR__ . '/LocalSettings.bundled.php';
+}}
+# END ministation_bundled
 """
     CUSTOM_SETTINGS.write_text(custom, encoding="utf-8")
     print(f"Wrote {CUSTOM_SETTINGS}")
@@ -518,6 +524,7 @@ def run_setup() -> None:
     install_mediawiki()
     write_custom_settings_snippet()
     print("\nSetup complete.")
+    print("Optional: python -m tools extensions   # official bundled extensions/skins")
     print("Next: python -m tools migrate")
     print("Then:  python -m tools start")
 

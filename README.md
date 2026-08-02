@@ -50,7 +50,8 @@ python -m tools start     # MediaWiki :3000 + sprites :3001
 
 | Команда | Назначение |
 |---------|------------|
-| `python -m tools setup` | PHP-check, скачать MediaWiki, Postgres role/DB/schema, `install.php`, линки skin/ext |
+| `python -m tools setup` | PHP-check, MediaWiki, Postgres, install.php |
+| `python -m tools extensions` | Все **официальные bundled** расширения/скины релиза (Cite, VisualEditor, Scribunto, …) |
 | `python -m tools db` | только PostgreSQL |
 | `python -m tools migrate` | Markdown → wikitext → страницы MW |
 | `python -m tools start` | `php -S` + uvicorn спрайтов |
