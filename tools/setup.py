@@ -106,9 +106,11 @@ def _which(cmd: str) -> str | None:
 
 
 def _download_with_curl(url: str, dest: Path) -> None:
+    # Force HTTP/1.1 — HTTP/2 often fails with: curl error 92 CANCEL
     cmd = [
         "curl",
         "-fsSL",
+        "--http1.1",
         "--retry",
         "5",
         "--retry-all-errors",
