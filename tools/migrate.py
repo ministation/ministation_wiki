@@ -56,7 +56,25 @@ def parse_frontmatter(text: str) -> tuple[dict, str]:
     m = FRONTMATTER_RE.match(text)
     if not m:
         return {}, text
-    meta = yaml.safe_load(m.group(1)) or {}
+    raw = m.group(1)
+    try:
+        meta = yaml.safe_load(raw) or {}
+    except yaml.YAMLError:
+        # Titles with unquoted ":" (e.g. Справка: спрайты) break YAML — recover.
+        meta = {}
+        for line in raw.splitlines():
+            if ":" not in line or line.strip().startswith("-"):
+                continue
+            key, _, val = line.partition(":")
+            key, val = key.strip(), val.strip().strip("\"'")
+            if not key:
+                continue
+            if key == "categories":
+                continue
+            meta[key] = val
+        cats = re.findall(r"^\s*-\s+(.+)$", raw, re.M)
+        if cats:
+            meta["categories"] = [c.strip().strip("\"'") for c in cats]
     return meta if isinstance(meta, dict) else {}, text[m.end() :]
 
 
