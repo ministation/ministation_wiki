@@ -409,9 +409,16 @@ def install_mediawiki() -> None:
         print("LocalSettings.php already exists — skip install.php")
         return
 
+    # Git installs don't ship Vector/etc.; MiniStation is linked just before this.
+    skin_dir = MW_DIR / "skins" / "MiniStation"
+    if not (skin_dir / "skin.json").is_file():
+        raise SystemExit(
+            f"Skin MiniStation missing at {skin_dir}. "
+            "Expected symlink from repo skins/MiniStation."
+        )
+
     server = SITE_PUBLIC_URL
     if "localhost" in server or "127.0.0.1" in server or not server.startswith("http"):
-        # local default for first install
         from tools.config import WIKI_HOST, WIKI_PORT
 
         server = f"http://{WIKI_HOST}:{WIKI_PORT}"
@@ -427,21 +434,19 @@ def install_mediawiki() -> None:
         f"--dbuser={WIKI_DB_USER}",
         f"--dbpass={WIKI_DB_PASS}",
         f"--dbschema={WIKI_DB_SCHEMA}",
-        f"--installdbuser={PGUSER}",
+        # Use wiki role for install too — Ubuntu postgres often has no TCP password.
+        f"--installdbuser={WIKI_DB_USER}",
+        f"--installdbpass={WIKI_DB_PASS}",
         f"--lang={MW_LANG}",
         f"--pass={MW_ADMIN_PASS}",
         f"--server={server}",
         f"--scriptpath={MW_SCRIPT_PATH}",
-        "--skins=Vector,MonoBook,Timeless",
+        "--skins=MiniStation",
         SITE_NAME,
         MW_ADMIN,
     ]
-    if PGPASSWORD:
-        cmd.insert(-2, f"--installdbpass={PGPASSWORD}")
 
     env = os.environ.copy()
-    if PGPASSWORD:
-        env["PGPASSWORD"] = PGPASSWORD
     print("+", " ".join(c if "pass" not in c.lower() else c.split("=")[0] + "=***" for c in cmd))
     subprocess.run(cmd, cwd=MW_DIR, check=True, env=env)
     print("MediaWiki installed.")

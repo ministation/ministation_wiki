@@ -19,8 +19,8 @@
   try {
     saved = localStorage.getItem(key);
   } catch (e) {}
-  // Site default is dark (ministation.ru atmosphere)
-  apply(saved || "dark");
+  // Default: light; user can switch to dark
+  apply(saved === "dark" || saved === "light" ? saved : "light");
 
   function bind() {
     var btn = document.getElementById("themeToggle");
