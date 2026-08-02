@@ -457,75 +457,92 @@ CUSTOM_MARKER = "# BEGIN ministation_custom"
 
 
 def sanitize_bundled_loader() -> None:
-    """Wrap bare wfLoad* calls so missing extensions do not fatal the wiki."""
+    """Wrap bare wfLoad* calls; gate VisualEditor + DiscussionTools on VE assets."""
     bundled = CUSTOM_SETTINGS.parent / "LocalSettings.bundled.php"
     if not bundled.is_file():
         return
     text = bundled.read_text(encoding="utf-8")
     original = text
 
-    # VisualEditor without submodule assets breaks ResourceLoader CSS/JS.
-    text = re.sub(
-        r"^\s*wfLoadExtension\(\s*'VisualEditor'\s*\)\s*;\s*$",
-        (
-            "if ( is_file( \"$IP/extensions/VisualEditor/extension.json\" ) "
-            "&& is_file( \"$IP/extensions/VisualEditor/lib/ve/build/modules.json\" ) ) {\n"
-            "\twfLoadExtension( 'VisualEditor' );\n"
+    ve_ready_block = (
+        "# VisualEditor needs git submodules (lib/ve). Without them RL breaks;\n"
+        "# DiscussionTools depends on VisualEditor — gate both the same way.\n"
+        '$wgMiniStationVeReady = is_file( "$IP/extensions/VisualEditor/extension.json" )\n'
+        '	&& is_file( "$IP/extensions/VisualEditor/lib/ve/build/modules.json" );\n'
+    )
+    if "$wgMiniStationVeReady" not in text:
+        # Insert after opening php tag
+        if text.lstrip().startswith("<?php"):
+            idx = text.find("<?php") + len("<?php")
+            text = text[:idx] + "\n" + ve_ready_block + text[idx:]
+        else:
+            text = "<?php\n" + ve_ready_block + text
+
+    def gate_ve_family(name: str, body: str) -> str:
+        return (
+            "if ( !empty( $wgMiniStationVeReady ) ) {\n"
+            f"\twfLoadExtension( '{name}' );\n"
             "}"
-        ),
+        )
+
+    for name in ("VisualEditor", "DiscussionTools"):
+        # Bare load
+        text = re.sub(
+            rf"^\s*wfLoadExtension\(\s*'{name}'\s*\)\s*;\s*$",
+            lambda m, n=name: gate_ve_family(n, m.group(0)),
+            text,
+            flags=re.MULTILINE,
+        )
+        # extension.json-only guard
+        text = re.sub(
+            rf"if \(\s*is_file\(\s*\"\$IP/extensions/{name}/extension\.json\"\s*\)\s*\)\s*\{{\s*"
+            rf"wfLoadExtension\(\s*'{name}'\s*\)\s*;\s*\}}",
+            lambda m, n=name: gate_ve_family(n, m.group(0)),
+            text,
+            flags=re.MULTILINE | re.DOTALL,
+        )
+        # VE dual-file guard (old sanitize) — still leave DiscussionTools gated via VeReady
+        if name == "VisualEditor":
+            text = re.sub(
+                r"if \(\s*is_file\(\s*\"\$IP/extensions/VisualEditor/extension\.json\"\s*\)\s*"
+                r"&&\s*is_file\(\s*\"\$IP/extensions/VisualEditor/lib/ve/build/modules\.json\"\s*\)\s*\)\s*\{"
+                r"\s*wfLoadExtension\(\s*'VisualEditor'\s*\)\s*;\s*\}",
+                gate_ve_family("VisualEditor", ""),
+                text,
+                flags=re.MULTILINE | re.DOTALL,
+            )
+
+    # Wrap any remaining bare loads (skins / other exts) — do not touch already-guarded blocks.
+    def wrap_skin(m: re.Match[str]) -> str:
+        name = m.group(1)
+        return (
+            f'if ( is_file( "$IP/skins/{name}/skin.json" ) ) {{\n'
+            f"\twfLoadSkin( '{name}' );\n"
+            f"}}"
+        )
+
+    def wrap_ext(m: re.Match[str]) -> str:
+        name = m.group(1)
+        if name in ("VisualEditor", "DiscussionTools"):
+            return gate_ve_family(name, "")
+        return (
+            f'if ( is_file( "$IP/extensions/{name}/extension.json" ) ) {{\n'
+            f"\twfLoadExtension( '{name}' );\n"
+            f"}}"
+        )
+
+    text = re.sub(
+        r"^\s*wfLoadSkin\(\s*'([^']+)'\s*\)\s*;\s*$",
+        wrap_skin,
         text,
         flags=re.MULTILINE,
     )
-    # Also fix already-guarded-but-incomplete VE loads (extension.json only).
     text = re.sub(
-        r"if \(\s*is_file\(\s*\"\$IP/extensions/VisualEditor/extension\.json\"\s*\)\s*\)\s*\{\s*"
-        r"wfLoadExtension\(\s*'VisualEditor'\s*\)\s*;\s*\}",
-        (
-            'if ( is_file( "$IP/extensions/VisualEditor/extension.json" ) '
-            '&& is_file( "$IP/extensions/VisualEditor/lib/ve/build/modules.json" ) ) {\n'
-            "\twfLoadExtension( 'VisualEditor' );\n"
-            "}"
-        ),
+        r"^\s*wfLoadExtension\(\s*'([^']+)'\s*\)\s*;\s*$",
+        wrap_ext,
         text,
-        flags=re.MULTILINE | re.DOTALL,
+        flags=re.MULTILINE,
     )
-
-    if 'is_file( "$IP/' not in text:
-        def wrap_skin(m: re.Match[str]) -> str:
-            name = m.group(1)
-            return (
-                f'if ( is_file( "$IP/skins/{name}/skin.json" ) ) {{\n'
-                f"\twfLoadSkin( '{name}' );\n"
-                f"}}"
-            )
-
-        def wrap_ext(m: re.Match[str]) -> str:
-            name = m.group(1)
-            if name == "VisualEditor":
-                return (
-                    'if ( is_file( "$IP/extensions/VisualEditor/extension.json" ) '
-                    '&& is_file( "$IP/extensions/VisualEditor/lib/ve/build/modules.json" ) ) {\n'
-                    "\twfLoadExtension( 'VisualEditor' );\n"
-                    "}"
-                )
-            return (
-                f'if ( is_file( "$IP/extensions/{name}/extension.json" ) ) {{\n'
-                f"\twfLoadExtension( '{name}' );\n"
-                f"}}"
-            )
-
-        text = re.sub(
-            r"^\s*wfLoadSkin\(\s*'([^']+)'\s*\)\s*;\s*$",
-            wrap_skin,
-            text,
-            flags=re.MULTILINE,
-        )
-        text = re.sub(
-            r"^\s*wfLoadExtension\(\s*'([^']+)'\s*\)\s*;\s*$",
-            wrap_ext,
-            text,
-            flags=re.MULTILINE,
-        )
 
     if text != original:
         bundled.write_text(text, encoding="utf-8")
