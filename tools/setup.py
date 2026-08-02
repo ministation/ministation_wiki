@@ -122,9 +122,15 @@ def _tar_ok(path: Path) -> bool:
 
 def _download_with_curl(url: str, dest: Path) -> None:
     """Resume-capable download over IPv4 + HTTP/1.1 (avoids common VPS truncations)."""
-    # Do not start from scratch if a partial exists — use -C -
     attempts = 20
     for i in range(1, attempts + 1):
+        # If a previous attempt already left a valid archive, stop.
+        # Some mirrors advertise a wrong/larger Content-Length; curl then keeps
+        # "resuming" and appends garbage past the real ~24MB tarball.
+        if dest.exists() and _tar_ok(dest):
+            print(f"Archive already valid ({dest.stat().st_size} bytes), skipping further curl.")
+            return
+
         cmd = [
             "curl",
             "-fL",
@@ -145,13 +151,18 @@ def _download_with_curl(url: str, dest: Path) -> None:
         ]
         print(f"curl attempt {i}/{attempts}…")
         proc = subprocess.run(cmd)
+        if dest.exists() and _tar_ok(dest):
+            return
         if proc.returncode == 0:
-            if _tar_ok(dest):
-                return
             raise IOError("curl finished but archive is corrupt/incomplete")
         if proc.returncode in _CURL_RETRYABLE:
             size = dest.stat().st_size if dest.exists() else 0
             print(f"  partial/network error {proc.returncode}, have {size} bytes — resume…")
+            # If size is already past a sane full tarball (~40MB max for this release)
+            # and still invalid, wipe and restart clean — resume was appending junk.
+            if size > 40_000_000:
+                print("  file grew past expected size; restarting download from scratch…")
+                dest.unlink(missing_ok=True)
             continue
         raise subprocess.CalledProcessError(proc.returncode, cmd)
     raise IOError(f"curl failed after {attempts} resume attempts")
@@ -268,7 +279,13 @@ def download_mediawiki() -> None:
     cache = MW_DIR.parent / "data" / "cache"
     cache.mkdir(parents=True, exist_ok=True)
     tgz = cache / f"mediawiki-{MW_VERSION}.tar.gz"
-    _download_file(url, tgz)
+    if tgz.exists() and _tar_ok(tgz):
+        print(f"Using cached tarball {tgz} ({tgz.stat().st_size} bytes)")
+    else:
+        if tgz.exists() and tgz.stat().st_size > 40_000_000:
+            print(f"Removing oversized/corrupt cache {tgz}")
+            tgz.unlink()
+        _download_file(url, tgz)
     _extract_mediawiki_tarball(tgz)
     print(f"Extracted MediaWiki {MW_VERSION} → {MW_DIR}")
 
