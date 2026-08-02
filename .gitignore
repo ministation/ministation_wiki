@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 .env
 data/sprite_cache/
+data/cache/
 *.egg-info/
 .DS_Store
 .idea/

@@ -14,6 +14,8 @@ MAIN_SITE_URL = os.getenv("MAIN_SITE_URL", "https://ministation.ru").rstrip("/")
 
 MW_VERSION = os.getenv("MW_VERSION", "1.45.1")
 MW_DIR = Path(os.getenv("MW_DIR", str(BASE_DIR / "mediawiki")))
+# Optional: path to an already-downloaded mediawiki-*.tar.gz (skips network)
+MW_TARBALL = os.getenv("MW_TARBALL", "").strip()
 MW_LANG = os.getenv("MW_LANG", "ru")
 MW_ADMIN = os.getenv("MW_ADMIN", "Admin")
 MW_ADMIN_PASS = os.getenv("MW_ADMIN_PASS", "changeme_admin")
