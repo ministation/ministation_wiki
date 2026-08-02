@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -94,6 +95,24 @@ def check_php() -> None:
         )
 
 
+def _download_file(url: str, dest: Path) -> None:
+    """Download with a real User-Agent — releases.wikimedia.org returns 403 for bare urllib."""
+    req = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": (
+                "ministation_wiki-setup/1.0 "
+                "(+https://wiki.ministation.ru; MediaWiki installer) "
+                "Python-urllib"
+            ),
+            "Accept": "*/*",
+        },
+        method="GET",
+    )
+    with urllib.request.urlopen(req, timeout=120) as resp, dest.open("wb") as out:
+        shutil.copyfileobj(resp, out)
+
+
 def download_mediawiki() -> None:
     marker = MW_DIR / "includes" / "MediaWiki.php"
     if marker.is_file():
@@ -107,7 +126,13 @@ def download_mediawiki() -> None:
 
     with tempfile.TemporaryDirectory() as tmp:
         tgz = Path(tmp) / "mw.tar.gz"
-        urllib.request.urlretrieve(url, tgz)
+        try:
+            _download_file(url, tgz)
+        except urllib.error.HTTPError as e:
+            raise SystemExit(
+                f"Failed to download MediaWiki ({e.code} {e.reason}): {url}\n"
+                f"Try manually: curl -L -o /tmp/mw.tar.gz {url}"
+            ) from e
         with tarfile.open(tgz, "r:gz") as tf:
             tf.extractall(tmp)
         extracted = next(Path(tmp).glob("mediawiki-*"))
