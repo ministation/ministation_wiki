@@ -359,17 +359,21 @@ body {
   position: relative;
   z-index: 1;
   max-width: 1280px;
+  width: 100%;
   margin: 0 auto;
-  padding: 22px 18px 56px;
-  display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 22px;
-  align-items: start;
+  padding: 18px 18px 56px;
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 .sidebar {
+  width: 222px;
+  flex-shrink: 0;
   position: sticky;
-  top: 86px;
+  top: 88px;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -379,53 +383,106 @@ body {
   background: var(--panel);
   border: 2px solid var(--border);
   border-radius: var(--radius);
-  padding: 14px 12px;
+  padding: 10px;
   box-shadow: var(--shadow-hard);
 }
 
+/* Same as ministation.ru .side-group-title */
+.side-group-title,
+.side-portlet__label,
 .side-title {
-  font-family: var(--font-pixel);
-  font-size: 0.58rem;
   color: var(--muted);
-  margin: 0 0 12px;
-  letter-spacing: 0.04em;
+  font-family: var(--font-pixel);
+  font-size: 0.56rem;
+  text-transform: uppercase;
+  padding: 4px 6px 10px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  letter-spacing: 0.02em;
   line-height: 1.4;
 }
 
-.side-portlet + .side-portlet { margin-top: 12px; }
-.side-portlet__label {
-  font-family: var(--font-pixel);
-  font-size: 0.5rem;
-  color: var(--dim);
-  margin: 0 0 8px;
-  letter-spacing: 0.03em;
+.side-portlet + .side-portlet {
+  margin-top: 8px;
 }
 
+.side-menu,
 .side-portlet ul,
 .side-group ul {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
-.side-portlet a,
-.side-group .mw-list-item > a {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 10px;
-  border-radius: 8px;
-  color: var(--ink) !important;
-  text-decoration: none !important;
-  font-family: var(--font-pixel);
-  font-size: 0.52rem;
-  line-height: 1.45;
-  letter-spacing: 0.02em;
+.side-menu .mw-list-item,
+.side-portlet .mw-list-item,
+.side-menu li,
+.side-portlet li {
+  display: block;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
-.side-portlet a:hover,
-.side-group .mw-list-item > a:hover {
-  background: color-mix(in srgb, var(--accent) 14%, var(--panel));
-  color: var(--accent) !important;
+
+/*
+ * Exact match to ministation.ru:
+ * .sidebar .nav-btn, .sidebar .side-link
+ */
+.sidebar .side-portlet .mw-list-item > a,
+.sidebar .side-portlet a,
+.sidebar .side-menu a {
+  display: flex !important;
+  align-items: center;
+  width: 100%;
+  justify-content: flex-start;
+  text-align: left;
+  text-decoration: none !important;
+  cursor: pointer;
+  gap: 9px;
+  margin: 0 0 6px;
+  background: var(--panel-2) !important;
+  color: var(--ink) !important;
+  border: 2px solid var(--border) !important;
+  border-radius: var(--radius-sm);
+  padding: 11px 12px !important;
+  min-height: 44px;
+  box-sizing: border-box;
+  font-family: var(--font-pixel);
+  font-size: 0.58rem;
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  box-shadow: none !important;
+  transition: background var(--transition), border-color var(--transition),
+              transform var(--transition), color var(--transition);
+}
+
+.sidebar .side-portlet .mw-list-item:last-child > a,
+.sidebar .side-portlet li:last-child > a {
+  margin-bottom: 0;
+}
+
+.sidebar .side-portlet .mw-list-item > a:hover,
+.sidebar .side-portlet a:hover,
+.sidebar .side-menu a:hover {
+  background: var(--panel-3) !important;
+  border-color: var(--border-strong) !important;
+  color: var(--ink) !important;
+  transform: translateX(2px);
+  text-decoration: none !important;
+}
+
+.sidebar .side-portlet .mw-list-item.selected > a,
+.sidebar .side-portlet .mw-list-item.is-active > a {
+  background: var(--accent) !important;
+  color: #fff !important;
+  border-color: var(--accent-deep) !important;
+  box-shadow: var(--shadow-btn-color) !important;
 }
 
 .side-note {
@@ -443,7 +500,7 @@ body {
   word-break: break-all;
 }
 
-.content { min-width: 0; }
+.content { flex: 1; min-width: 0; max-width: 100%; overflow-x: hidden; }
 
 .wiki-page {
   background: var(--panel);
@@ -727,8 +784,14 @@ body {
     flex: 1 1 100%;
     max-width: none;
   }
-  .shell { grid-template-columns: 1fr; }
-  .sidebar { position: static; order: 2; }
+  .shell {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    position: static;
+    order: 2;
+  }
   .wiki-infobox {
     float: none;
     width: 100%;
