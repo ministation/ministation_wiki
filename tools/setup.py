@@ -103,6 +103,8 @@ UA = (
 
 # curl: 18 partial, 28 timeout, 56 recv failure, 92 HTTP/2 cancel
 _CURL_RETRYABLE = {18, 28, 56, 92}
+# Real release tarball is ~20–30MB; larger usually means bad Content-Length + appended junk
+_MAX_TARBALL_BYTES = 35_000_000
 
 
 def _which(cmd: str) -> str | None:
@@ -111,7 +113,8 @@ def _which(cmd: str) -> str | None:
 
 def _tar_ok(path: Path) -> bool:
     try:
-        if path.stat().st_size < 1_000_000:
+        size = path.stat().st_size
+        if size < 5_000_000 or size > _MAX_TARBALL_BYTES:
             return False
         with tarfile.open(path, "r:gz") as tf:
             members = tf.getmembers()
@@ -121,61 +124,51 @@ def _tar_ok(path: Path) -> bool:
 
 
 def _download_with_curl(url: str, dest: Path) -> None:
-    """Resume-capable download over IPv4 + HTTP/1.1 (avoids common VPS truncations)."""
-    attempts = 20
+    """Fresh downloads only (no -C resume). Wrong Content-Length + resume corrupts the file."""
+    attempts = 12
     for i in range(1, attempts + 1):
-        # If a previous attempt already left a valid archive, stop.
-        # Some mirrors advertise a wrong/larger Content-Length; curl then keeps
-        # "resuming" and appends garbage past the real ~24MB tarball.
-        if dest.exists() and _tar_ok(dest):
-            print(f"Archive already valid ({dest.stat().st_size} bytes), skipping further curl.")
-            return
-
+        dest.unlink(missing_ok=True)
         cmd = [
             "curl",
             "-fL",
             "--http1.1",
             "-4",
-            "-C",
-            "-",
             "--connect-timeout",
             "30",
             "--max-time",
             "600",
             "-A",
             UA,
+            "-H",
+            "Accept-Encoding: identity",
             "--progress-bar",
             "-o",
             str(dest),
             url,
         ]
-        print(f"curl attempt {i}/{attempts}…")
+        print(f"curl attempt {i}/{attempts} (no resume)…")
         proc = subprocess.run(cmd)
         if dest.exists() and _tar_ok(dest):
+            print(f"  valid archive ({dest.stat().st_size} bytes)")
             return
-        if proc.returncode == 0:
-            raise IOError("curl finished but archive is corrupt/incomplete")
-        if proc.returncode in _CURL_RETRYABLE:
-            size = dest.stat().st_size if dest.exists() else 0
-            print(f"  partial/network error {proc.returncode}, have {size} bytes — resume…")
-            # If size is already past a sane full tarball (~40MB max for this release)
-            # and still invalid, wipe and restart clean — resume was appending junk.
-            if size > 40_000_000:
-                print("  file grew past expected size; restarting download from scratch…")
-                dest.unlink(missing_ok=True)
+        size = dest.stat().st_size if dest.exists() else 0
+        if proc.returncode in _CURL_RETRYABLE or proc.returncode == 0:
+            print(f"  incomplete (code={proc.returncode}, size={size}), retry fresh…")
+            dest.unlink(missing_ok=True)
             continue
         raise subprocess.CalledProcessError(proc.returncode, cmd)
-    raise IOError(f"curl failed after {attempts} resume attempts")
+    raise IOError(f"curl failed after {attempts} fresh attempts")
 
 
 def _download_with_wget(url: str, dest: Path) -> None:
+    dest.unlink(missing_ok=True)
     cmd = [
         "wget",
-        "--tries=20",
-        "--continue",
+        "--tries=8",
         "--timeout=30",
         "-4",
         f"--user-agent={UA}",
+        "--header=Accept-Encoding: identity",
         "-O",
         str(dest),
         url,
@@ -187,25 +180,25 @@ def _download_with_wget(url: str, dest: Path) -> None:
 
 
 def _download_with_urllib(url: str, dest: Path) -> None:
-    # Prefer IPv4 by resolving? urllib has no simple -4; still try with Range resume
-    existing = dest.stat().st_size if dest.exists() else 0
-    headers = {"User-Agent": UA, "Accept": "*/*"}
-    if existing:
-        headers["Range"] = f"bytes={existing}-"
-    req = urllib.request.Request(url, headers=headers, method="GET")
-    mode = "ab" if existing else "wb"
-    with urllib.request.urlopen(req, timeout=600) as resp, dest.open(mode) as out:
+    dest.unlink(missing_ok=True)
+    req = urllib.request.Request(
+        url,
+        headers={"User-Agent": UA, "Accept": "*/*", "Accept-Encoding": "identity"},
+        method="GET",
+    )
+    with urllib.request.urlopen(req, timeout=600) as resp, dest.open("wb") as out:
         while True:
             chunk = resp.read(1024 * 256)
             if not chunk:
                 break
             out.write(chunk)
+            if out.tell() > _MAX_TARBALL_BYTES:
+                raise IOError("download exceeded expected mediawiki tarball size")
     if not _tar_ok(dest):
         raise IOError("urllib finished but archive is corrupt/incomplete")
 
 
 def _download_file(url: str, dest: Path) -> None:
-    """Download large release tarball; prefer curl/wget with resume + IPv4."""
     errors: list[str] = []
     for name, fn in (
         ("curl", _download_with_curl if _which("curl") else None),
@@ -215,26 +208,19 @@ def _download_file(url: str, dest: Path) -> None:
         if fn is None:
             continue
         try:
-            # Keep partial for curl/wget resume; only wipe for a fresh urllib without range if corrupt
-            if name == "urllib" and dest.exists() and not _tar_ok(dest):
-                # keep partial for Range resume
-                pass
             fn(url, dest)
             print(f"Downloaded via {name}: {dest.stat().st_size} bytes")
             return
-        except Exception as e:  # noqa: BLE001 — try next downloader
+        except Exception as e:  # noqa: BLE001
             errors.append(f"{name}: {e}")
-            # If corrupt, remove so next tool starts clean
-            if dest.exists() and not _tar_ok(dest) and name != "curl":
-                # leave curl partials for nothing if switching tools — wipe
-                dest.unlink(missing_ok=True)
+            dest.unlink(missing_ok=True)
     raise SystemExit(
-        "Failed to download MediaWiki:\n  - "
+        "Failed to download MediaWiki tarball:\n  - "
         + "\n  - ".join(errors)
-        + "\n\nWorkaround on the server:\n"
-        f"  curl -fL --http1.1 -4 -C - -o /tmp/mw.tar.gz {url}\n"
-        "  # repeat until ls -lh shows ~23M and tar -tzf works\n"
-        f"  MW_TARBALL=/tmp/mw.tar.gz python3 -m tools setup"
+        + "\n\nPrefer git install on flaky links:\n"
+        "  MW_FETCH=git python3 -m tools setup\n"
+        "Or download elsewhere and:\n"
+        "  MW_TARBALL=/path/to/mediawiki-1.45.1.tar.gz python3 -m tools setup"
     )
 
 
@@ -251,6 +237,83 @@ def _extract_mediawiki_tarball(tgz: Path) -> None:
         if MW_DIR.exists():
             shutil.rmtree(MW_DIR)
         shutil.move(str(extracted), str(MW_DIR))
+
+
+def _rel_branch(version: str) -> str:
+    parts = version.split(".")
+    return f"REL{parts[0]}_{parts[1]}"
+
+
+def install_mediawiki_from_git() -> None:
+    """Clone core + vendor via git (many small objects — more reliable than one huge tarball)."""
+    if not _which("git"):
+        raise SystemExit("git not found (needed for MW_FETCH=git)")
+
+    if MW_DIR.exists():
+        shutil.rmtree(MW_DIR)
+
+    core_url = "https://github.com/wikimedia/mediawiki.git"
+    print(f"git clone --depth 1 --branch {MW_VERSION} {core_url}")
+    subprocess.run(
+        [
+            "git",
+            "clone",
+            "--depth",
+            "1",
+            "--branch",
+            MW_VERSION,
+            core_url,
+            str(MW_DIR),
+        ],
+        check=True,
+    )
+
+    vendor = MW_DIR / "vendor"
+    if vendor.exists():
+        shutil.rmtree(vendor)
+
+    # Prefer composer when available; else clone mediawiki-vendor for the release branch
+    composer = _which("composer")
+    if composer:
+        print("+ composer install --no-dev")
+        subprocess.run(
+            [composer, "install", "--no-dev", "--prefer-dist"],
+            cwd=MW_DIR,
+            check=True,
+        )
+    else:
+        rel = _rel_branch(MW_VERSION)
+        vendor_url = "https://github.com/wikimedia/mediawiki-vendor.git"
+        print(f"git clone --depth 1 --branch {rel} {vendor_url} → vendor/")
+        try:
+            subprocess.run(
+                [
+                    "git",
+                    "clone",
+                    "--depth",
+                    "1",
+                    "--branch",
+                    rel,
+                    vendor_url,
+                    str(vendor),
+                ],
+                check=True,
+            )
+        except subprocess.CalledProcessError:
+            print(f"Branch {rel} missing, trying default branch of mediawiki-vendor…")
+            subprocess.run(
+                ["git", "clone", "--depth", "1", vendor_url, str(vendor)],
+                check=True,
+            )
+
+    if not (MW_DIR / "includes" / "MediaWiki.php").is_file():
+        raise SystemExit("git install failed: MediaWiki.php missing")
+    if not (MW_DIR / "vendor" / "autoload.php").is_file():
+        raise SystemExit(
+            "vendor/autoload.php missing. Install composer (`apt install composer`) "
+            "or ensure mediawiki-vendor clone succeeded."
+        )
+    print(f"MediaWiki {MW_VERSION} installed from git → {MW_DIR}")
 
 
 def download_mediawiki() -> None:
@@ -270,21 +333,29 @@ def download_mediawiki() -> None:
         print(f"Extracted MediaWiki {MW_VERSION} → {MW_DIR}")
         return
 
+    fetch = os.getenv("MW_FETCH", "git").strip().lower()  # git|tarball|auto
+    MW_DIR.parent.mkdir(parents=True, exist_ok=True)
+
+    if fetch in ("git", "auto"):
+        try:
+            install_mediawiki_from_git()
+            return
+        except (SystemExit, subprocess.CalledProcessError) as e:
+            if fetch == "git":
+                raise
+            print(f"git install failed ({e}); falling back to tarball…")
+
     major = ".".join(MW_VERSION.split(".")[:2])
     url = f"https://releases.wikimedia.org/mediawiki/{major}/mediawiki-{MW_VERSION}.tar.gz"
     print(f"Downloading {url}…")
-    MW_DIR.parent.mkdir(parents=True, exist_ok=True)
 
-    # Persist partial downloads across setup retries (tmp dir would wipe them)
     cache = MW_DIR.parent / "data" / "cache"
     cache.mkdir(parents=True, exist_ok=True)
     tgz = cache / f"mediawiki-{MW_VERSION}.tar.gz"
     if tgz.exists() and _tar_ok(tgz):
         print(f"Using cached tarball {tgz} ({tgz.stat().st_size} bytes)")
     else:
-        if tgz.exists() and tgz.stat().st_size > 40_000_000:
-            print(f"Removing oversized/corrupt cache {tgz}")
-            tgz.unlink()
+        tgz.unlink(missing_ok=True)
         _download_file(url, tgz)
     _extract_mediawiki_tarball(tgz)
     print(f"Extracted MediaWiki {MW_VERSION} → {MW_DIR}")
