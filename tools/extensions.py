@@ -235,11 +235,11 @@ def install_bundled() -> None:
 
     write_custom_settings_snippet()
     run_update_php()
-	print(
-		f"\nDone: enabled {len(ext_names)} extensions and {len(skin_names)} skins.\n"
-		"Next: python -m tools sprites   # Textures from git\n"
-		"Note: bundled set = official MediaWiki release pack, not every ext on mediawiki.org."
-	)
+    print(
+        f"\nDone: enabled {len(ext_names)} extensions and {len(skin_names)} skins.\n"
+        "Next: python -m tools sprites   # Textures from git\n"
+        "Note: bundled set = official MediaWiki release pack, not every ext on mediawiki.org."
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
