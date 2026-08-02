@@ -132,17 +132,90 @@ def clone_bundled(modules: list[Submodule]) -> tuple[list[str], list[str]]:
     return sorted(ext_names), sorted(skin_names)
 
 
+def _write_composer_local() -> Path | None:
+    """Merge every extension/skin composer.json into the core vendor tree."""
+    includes: list[str] = []
+    for base in ("extensions", "skins"):
+        root = MW_DIR / base
+        if not root.is_dir():
+            continue
+        for child in sorted(root.iterdir()):
+            cj = child / "composer.json"
+            if cj.is_file():
+                includes.append(f"{base}/{child.name}/composer.json")
+    if not includes:
+        return None
+
+    path = MW_DIR / "composer.local.json"
+    # Keep any existing require blocks; always refresh merge-plugin includes.
+    existing: dict = {}
+    if path.is_file():
+        try:
+            import json
+
+            existing = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            existing = {}
+
+    import json
+
+    existing.setdefault("extra", {}).setdefault("merge-plugin", {})["include"] = includes
+    # mediawiki-merge-plugin also supports recurse; keep defaults sane
+    existing["extra"]["merge-plugin"].setdefault("recurse", True)
+    existing["extra"]["merge-plugin"].setdefault("replace", False)
+    path.write_text(json.dumps(existing, indent=2) + "\n", encoding="utf-8")
+    print(f"Wrote {path} ({len(includes)} merge includes)")
+    return path
+
+
 def _composer_update() -> None:
+    """Install PHP deps required by cloned extensions (e.g. AbuseFilter → equivset)."""
+    _write_composer_local()
     composer = shutil.which("composer")
-    if not composer:
-        print("composer not found — skip dependency update (apt install composer recommended)")
+    php = os.getenv("PHP_BIN", "php")
+    composer_phar = MW_DIR / "composer.phar"
+
+    if composer:
+        base = [composer]
+    elif composer_phar.is_file():
+        base = [php, str(composer_phar)]
+    else:
+        print(
+            "composer not found — install with: apt install composer\n"
+            "  then: cd mediawiki/extensions/AbuseFilter && composer update --no-dev\n"
+            "Or comment out AbuseFilter in config/LocalSettings.bundled.php until then."
+        )
         return
-    print("+ composer update --no-dev")
-    subprocess.run(
-        [composer, "update", "--no-dev", "--prefer-dist", "--no-interaction"],
-        cwd=MW_DIR,
-        check=False,
-    )
+
+    args = ["update", "--no-dev", "--prefer-dist", "--no-interaction"]
+
+    # Prefer per-extension vendor (safe with mediawiki-vendor git; see T417128).
+    for cj in sorted((MW_DIR / "extensions").glob("*/composer.json")):
+        cmd = [*base, *args]
+        print(f"+ {' '.join(cmd)} (cwd={cj.parent})")
+        subprocess.run(cmd, cwd=str(cj.parent), check=False)
+
+    vendor_git = (MW_DIR / "vendor" / ".git").exists()
+    if not vendor_git:
+        cmd = [*base, *args]
+        print(f"+ {' '.join(cmd)} (cwd={MW_DIR})")
+        subprocess.run(cmd, cwd=str(MW_DIR), check=False)
+    else:
+        print(
+            "vendor/ is mediawiki-vendor git — skipped root composer update "
+            "(avoids wiping vendor)"
+        )
+
+    af_equiv = MW_DIR / "extensions" / "AbuseFilter" / "vendor" / "wikimedia" / "equivset"
+    root_equiv = MW_DIR / "vendor" / "wikimedia" / "equivset"
+    if (MW_DIR / "extensions" / "AbuseFilter" / "extension.json").is_file() and not (
+        af_equiv.is_dir() or root_equiv.is_dir()
+    ):
+        print(
+            "WARNING: wikimedia/equivset still missing. Wiki will 500 with AbuseFilter.\n"
+            "  Fix: cd mediawiki/extensions/AbuseFilter && composer update --no-dev\n"
+            "  Or remove wfLoadExtension('AbuseFilter') from config/LocalSettings.bundled.php"
+        )
 
 
 def write_bundled_loader(ext_names: list[str], skin_names: list[str]) -> Path:
