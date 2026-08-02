@@ -63,8 +63,8 @@ python -m tools start     # MediaWiki :3000 + sprites :3001
 
 ```bash
 python -m tools sprites
-# форк Мини-станции / Goob:
-# SS14_RESOURCES_GIT=https://github.com/Goob-Station/Goob-Station.git python -m tools sprites
+# другой репозиторий/ветка:
+# SS14_RESOURCES_GIT=… SS14_RESOURCES_REF=… python -m tools sprites --update
 ```
 
 В статьях MediaWiki:

@@ -8,8 +8,8 @@ from pathlib import Path
 
 from tools.config import BASE_DIR, SS14_RESOURCES
 
-# Upstream SS14 textures (override with SS14_RESOURCES_GIT for mini-station-goob fork)
-DEFAULT_GIT = "https://github.com/space-wizards/space-station-14.git"
+# Mini-Station Goob textures (override with SS14_RESOURCES_GIT if needed)
+DEFAULT_GIT = "https://github.com/ministation/mini-station-goob.git"
 SS14_RESOURCES_GIT = os.getenv("SS14_RESOURCES_GIT", DEFAULT_GIT).strip()
 SS14_RESOURCES_REF = os.getenv("SS14_RESOURCES_REF", "master").strip()
 SS14_REPO_DIR = Path(
