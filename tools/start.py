@@ -33,6 +33,48 @@ def _child_env() -> dict[str, str]:
     return env
 
 
+def _refresh_local_settings() -> None:
+    """Rewrite config snippet so pulls take effect without a full reinstall."""
+    try:
+        from tools.setup import write_custom_settings_snippet
+
+        write_custom_settings_snippet()
+    except Exception as e:  # noqa: BLE001
+        print(f"WARNING: could not refresh LocalSettings.custom.php: {e}", file=sys.stderr)
+
+
+def _probe_wiki(port: int) -> None:
+    import urllib.error
+    import urllib.request
+    import re
+
+    url = f"http://127.0.0.1:{port}/"
+    try:
+        with urllib.request.urlopen(url, timeout=8) as resp:
+            print(f"Local probe {url} → HTTP {resp.status}")
+            return
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", errors="replace")
+        print(f"Local probe failed: HTTP Error {e.code}: {e.reason}")
+        # Strip tags lightly and show the exception text MediaWiki prints
+        text = re.sub(r"<script[\s\S]*?</script>", " ", body, flags=re.I)
+        text = re.sub(r"<style[\s\S]*?</style>", " ", text, flags=re.I)
+        text = re.sub(r"<[^>]+>", " ", text)
+        text = re.sub(r"\s+", " ", text).strip()
+        if text:
+            print("--- MediaWiki response (excerpt) ---")
+            print(text[:1200])
+            print("---")
+        print(
+            "Tip: ensure LocalSettings.custom.php was regenerated "
+            "(tools start does this now). For a full stack: "
+            "$wgShowExceptionDetails = true;"
+        )
+    except Exception as e:  # noqa: BLE001
+        print(f"Local probe failed: {e}")
+        print("If this fails, MediaWiki/PHP is not serving — check logs above.")
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
     if argv and argv[0] in ("-h", "--help"):
@@ -46,8 +88,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Router missing: {ROUTER}", file=sys.stderr)
         return 1
 
-    procs: list[subprocess.Popen] = []
+    _refresh_local_settings()
 
+    procs: list[subprocess.Popen] = []
     def shutdown(*_args) -> None:
         for p in procs:
             if p.poll() is None:
@@ -101,16 +144,8 @@ def main(argv: list[str] | None = None) -> int:
     procs.append(subprocess.Popen(wiki_cmd, cwd=str(BASE_DIR), env=env))
     procs.append(subprocess.Popen(sprite_cmd, cwd=str(BASE_DIR), env=env))
 
-    # Quick local probe
     time.sleep(0.8)
-    try:
-        import urllib.request
-
-        code = urllib.request.urlopen(f"http://127.0.0.1:{WIKI_PORT}/", timeout=3).status
-        print(f"Local probe http://127.0.0.1:{WIKI_PORT}/ → HTTP {code}")
-    except Exception as e:  # noqa: BLE001
-        print(f"Local probe failed: {e}")
-        print("If this fails, MediaWiki/PHP is not serving — check logs above.")
+    _probe_wiki(WIKI_PORT)
 
     try:
         while True:
