@@ -6,21 +6,21 @@ categories:
 
 # Добро пожаловать на вики Мини-станции
 
-Это **своя вики** под Space Station 14: страницы как в MediaWiki (инфобоксы, категории, внутренние ссылки), а оболочка — в стиле [сайта Мини-станции](https://ministation.ru).
+Это вики на **MediaWiki** для Space Station 14: инфобоксы, категории, `[[ссылки]]`, а оболочка — в стиле [сайта Мини-станции](https://ministation.ru).
 
 ## Быстрый старт
 
 - [[Guides|Гайды для новичков]]
 - [[Jobs|Список ролей]]
 - [[Items|Предметы]]
-- [[Security_Officer|Офицер СБ]]
+- [[Security Officer|Офицер СБ]]
 
 ## Спрайты из сборки
 
 Движок умеет вырезать кадры из `.rsi` вашей сборки. В статьях пишите:
 
 ```
-{{sprite:Objects/Weapons/Melee/knife.rsi/icon|scale=3}}
+{{#sprite:Objects/Weapons/Melee/knife.rsi/icon|scale=3}}
 ```
 
 Нужен путь `SS14_RESOURCES` к папке `Resources` билда (где лежит `Textures/`).
@@ -34,4 +34,4 @@ categories:
 | [[Items]] | Предметы и снаряжение |
 | Категория «Механики» | Игровые системы |
 
-Создавайте новые страницы как Markdown-файлы в `content/ru/`.
+Править страницы можно в MediaWiki (через веб-интерфейс). Исходники Markdown для первичного импорта лежат в `content/ru/` (`python -m tools migrate`).

@@ -3,5 +3,12 @@
 
 wiki.ministation.ru {
 	import tls_ministation
-	reverse_proxy 127.0.0.1:3000
+
+	handle /sprite/* {
+		reverse_proxy 127.0.0.1:3001
+	}
+
+	handle {
+		reverse_proxy 127.0.0.1:3000
+	}
 }

@@ -1,94 +1,80 @@
 # Вики Мини-станции (`ministation_wiki`)
 
-Лёгкий движок вики под **Space Station 14** для сервера Мини-станция.
+MediaWiki + PostgreSQL для сервера **Мини-станция** (SS14).
 
-- Страницы — Markdown (как у MediaWiki по духу: инфобоксы, категории, `[[ссылки]]`)
-- UI — как на [ministation.ru](https://ministation.ru): Exo 2 + Press Start 2P, янтарный акцент, светлая/тёмная тема
-- Спрайты — вырезка кадров из `.rsi` сборки (`Textures/…`)
+- Движок — **MediaWiki** (страницы, правки, категории)
+- БД — **PostgreSQL** (создаётся скриптом)
+- Спрайты RSI — отдельный FastAPI-сервис
+- Скин **MiniStation** — Exo 2 / Press Start 2P, янтарный акцент, light/dark
+- Оркестрация — Python **venv** (`python -m tools …`), без Docker
+
+> MediaWiki — PHP. Venv ставит зависимости Python и запускает CLI; на хосте нужны **PHP 8.1+** (`pdo_pgsql`, `pgsql`, `intl`, `mbstring`, `xml`, `curl`) и **PostgreSQL**.
 
 ## Быстрый старт
 
 ```bash
 cd ministation_wiki
-python3 -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
+python -m venv .venv
+
+# Linux/macOS
+source .venv/bin/activate
+# Windows
+# .venv\Scripts\activate
+
 pip install -r requirements.txt
 cp .env.example .env
-# укажите путь к Resources вашей сборки:
-# SS14_RESOURCES=/home/ss14_user/mini-station-goob/Resources
-uvicorn app.main:app --host 127.0.0.1 --port 3000
+# заполните PG* / MW_ADMIN_PASS / SS14_RESOURCES
+
+python -m tools setup     # скачать MW, создать БД, install.php, скин/расширение
+python -m tools migrate   # импорт content/ru/*.md
+python -m tools start     # MediaWiki :3000 + sprites :3001
 ```
 
 Откройте http://127.0.0.1:3000/
 
-В Caddy для `wiki.ministation.ru` уже заложен прокси на `:3000`.
+### Команды
 
-## Синтаксис страниц
+| Команда | Назначение |
+|---------|------------|
+| `python -m tools setup` | PHP-check, скачать MediaWiki, Postgres role/DB/schema, `install.php`, линки skin/ext |
+| `python -m tools db` | только PostgreSQL |
+| `python -m tools migrate` | Markdown → wikitext → страницы MW |
+| `python -m tools start` | `php -S` + uvicorn спрайтов |
 
-Файлы лежат в `content/ru/*.md`.
+## Спрайты
 
-```markdown
----
-title: Название
-categories:
-  - Роли
----
+В статьях MediaWiki:
 
-{{infobox
-| title = Пример
-| image = {{sprite:Objects/Weapons/Melee/knife.rsi/icon|scale=3}}
-| отдел = Сервис
-}}
-
-Текст со [[Jobs|ссылкой на роли]].
-
-{{sprite:Clothing/Uniforms/Jumpsuit/security.rsi/icon|scale=2}}
+```
+{{#sprite:Objects/Weapons/Melee/knife.rsi/icon|scale=3}}
 ```
 
-### Спрайты
+Нужен `SS14_RESOURCES` (папка `Resources` билда со `Textures/`).  
+HTTP: `GET http://127.0.0.1:3001/sprite/…`
 
-| Запись | Смысл |
-|--------|--------|
-| `{{sprite:Path/File.rsi/state}}` | кадр state |
-| `\|scale=3` | nearest-neighbor upscale |
-| `\|frame=0` | кадр анимации |
-| `\|dir=0` | направление (0..directions-1) |
-
-Путь относительно `Resources/Textures/`.
-
-HTTP: `GET /sprite/Objects/Weapons/Melee/knife.rsi/icon?scale=3`
+Публичный URL для картинок задаётся `SPRITE_PUBLIC_URL` (за Caddy обычно `https://wiki.ministation.ru/sprite` или отдельный прокси).
 
 ## Структура
 
 ```
-app/
-  main.py           # FastAPI
-  wiki/store.py     # файловое хранилище страниц
-  wiki/renderer.py  # markdown + wiki-разметка
-  sprites/rsi.py    # RSI → PNG cache
-content/ru/         # статьи
-templates/          # Jinja
-static/             # CSS/JS
+mediawiki/              # ядро (скачивается setup'ом, в .gitignore)
+skins/MiniStation/      # кастомный скин
+extensions/SS14Sprites/ # {{#sprite:}}
+tools/                  # setup / db / migrate / start
+app/                    # FastAPI только /sprite
+content/ru/             # исходники для migrate
+config/                 # LocalSettings.custom.php (генерирует setup)
 ```
 
-## systemd (пример)
+## systemd
 
-```ini
-[Unit]
-Description=Mini Station Wiki
-After=network.target
+Два unit-файла в `deploy/`:
 
-[Service]
-User=ss14_user
-WorkingDirectory=/home/ss14_user/ministation_wiki
-EnvironmentFile=/home/ss14_user/ministation_wiki/.env
-ExecStart=/home/ss14_user/ministation_wiki/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 3000
-Restart=always
+- `ministation-wiki.service` — MediaWiki (`php -S` или php-fpm + Caddy)
+- `ministation-wiki-sprites.service` — uvicorn спрайтов
 
-[Install]
-WantedBy=multi-user.target
-```
+Пример Caddy: `deploy/Caddyfile.snippet` (вики на `:3000`, `/sprite/*` → `:3001`).
 
 ## Лицензия
 
-Код движка — для проекта Мини-станция. Контент статей и спрайты SS14 подчиняются лицензиям соответствующих репозиториев.
+Код обвязки — для проекта Мини-станция. MediaWiki — GPL. Контент и спрайты SS14 — по лицензиям соответствующих репозиториев.

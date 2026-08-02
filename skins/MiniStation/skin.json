@@ -1,0 +1,76 @@
+{
+	"name": "MiniStation",
+	"version": "1.0.0",
+	"author": [ "Mini Station" ],
+	"url": "https://wiki.ministation.ru",
+	"descriptionmsg": "ministation-skin-desc",
+	"namemsg": "skinname-ministation",
+	"license-name": "MIT",
+	"type": "skin",
+	"requires": {
+		"MediaWiki": ">= 1.39.0"
+	},
+	"ValidSkinNames": {
+		"ministation": {
+			"class": "SkinMustache",
+			"args": [
+				{
+					"name": "ministation",
+					"responsive": true,
+					"menus": [
+						"user-page",
+						"notifications",
+						"associated-pages",
+						"variants",
+						"views",
+						"actions",
+						"user-interface-preferences",
+						"languages"
+					],
+					"messages": [
+						"sitetitle",
+						"search",
+						"navigation-heading",
+						"otherlanguages",
+						"tagline"
+					],
+					"styles": [
+						"skins.ministation.styles"
+					],
+					"scripts": [
+						"skins.ministation"
+					]
+				}
+			]
+		}
+	},
+	"MessagesDirs": {
+		"MiniStation": [
+			"i18n"
+		]
+	},
+	"ResourceModules": {
+		"skins.ministation.styles": {
+			"class": "MediaWiki\\ResourceLoader\\SkinModule",
+			"features": {
+				"normalize": true,
+				"elements": true,
+				"content-media": true,
+				"content-links": true,
+				"content-tables": true,
+				"interface": true,
+				"toc": true,
+				"logo": true
+			},
+			"styles": [ "resources/skin.less" ]
+		},
+		"skins.ministation": {
+			"scripts": [ "resources/skin.js" ]
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "",
+		"remoteSkinPath": "MiniStation"
+	},
+	"manifest_version": 2
+}

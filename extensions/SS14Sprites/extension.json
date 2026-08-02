@@ -1,0 +1,32 @@
+{
+	"name": "SS14Sprites",
+	"author": "Mini Station",
+	"url": "https://wiki.ministation.ru",
+	"descriptionmsg": "ss14sprites-desc",
+	"license-name": "MIT",
+	"type": "other",
+	"requires": {
+		"MediaWiki": ">= 1.39.0"
+	},
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\SS14Sprites\\": "includes/"
+	},
+	"Hooks": {
+		"ParserFirstCallInit": "MediaWiki\\Extension\\SS14Sprites\\Hooks::onParserFirstCallInit"
+	},
+	"config": {
+		"SS14SpriteServiceUrl": {
+			"value": "http://127.0.0.1:3001",
+			"description": "Base URL of the RSI sprite HTTP service (no trailing slash required)."
+		}
+	},
+	"MessagesDirs": {
+		"SS14Sprites": [
+			"i18n"
+		]
+	},
+	"ExtensionMessagesFiles": {
+		"SS14SpritesMagic": "SS14Sprites.i18n.magic.php"
+	},
+	"manifest_version": 2
+}

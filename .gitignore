@@ -7,3 +7,5 @@ data/sprite_cache/
 .DS_Store
 .idea/
 .vscode/
+mediawiki/
+config/LocalSettings.custom.php

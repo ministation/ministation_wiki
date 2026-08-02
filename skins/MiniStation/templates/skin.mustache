@@ -1,0 +1,66 @@
+{{! Soft document chrome is provided by OutputPage; body layout below. }}
+<div class="bg-grid" aria-hidden="true"></div>
+<header class="topbar">
+	<div class="topbar-inner">
+		<a class="logo" href="{{link-mainpage}}">
+			<span class="logo-mark" aria-hidden="true"></span>
+			<span class="logo-text">Мини<span>-</span>вики</span>
+		</a>
+		{{#data-search-box}}
+		<form class="search" action="{{form-action}}" method="get" role="search">
+			<label class="sr-only" for="{{page-title}}">{{msg-search}}</label>
+			{{{html-input}}}
+			{{{html-button-search}}}
+		</form>
+		{{/data-search-box}}
+		<div class="topbar-actions">
+			<button type="button" class="icon-btn" id="themeToggle" title="Тема" aria-label="Сменить тему">◐</button>
+			{{#data-portlets}}
+				{{#data-user-menu}}{{>PortletInline}}{{/data-user-menu}}
+				{{#data-actions}}{{>PortletInline}}{{/data-actions}}
+			{{/data-portlets}}
+		</div>
+	</div>
+</header>
+
+<div class="shell">
+	<aside class="sidebar">
+		<div class="side-group">
+			<div class="side-title">{{msg-navigation-heading}}</div>
+			{{#data-portlets-sidebar.data-portlets-first}}{{>Portlet}}{{/data-portlets-sidebar.data-portlets-first}}
+			{{#data-portlets-sidebar.array-portlets-rest}}{{>Portlet}}{{/data-portlets-sidebar.array-portlets-rest}}
+		</div>
+		<div class="side-group">
+			<div class="side-title">Страница</div>
+			{{#data-portlets}}
+				{{#data-views}}{{>Portlet}}{{/data-views}}
+				{{#data-associated-pages}}{{>Portlet}}{{/data-associated-pages}}
+			{{/data-portlets}}
+		</div>
+	</aside>
+
+	<main class="content" id="content" role="main">
+		<article class="wiki-page mw-body">
+			<header class="page-head">
+				{{#array-indicators}}
+				<div class="mw-indicators">{{{html}}}</div>
+				{{/array-indicators}}
+				{{{html-title-heading}}}
+				{{#html-subtitle}}<div id="contentSub" class="lede">{{{html-subtitle}}}</div>{{/html-subtitle}}
+			</header>
+			<div id="bodyContent" class="prose mw-body-content">
+				{{{html-body-content}}}
+				{{#data-portlets}}{{>CategoryPortlet}}{{/data-portlets}}
+				{{{html-after-content}}}
+			</div>
+		</article>
+	</main>
+</div>
+
+<footer class="footer">
+	<p>Вики Мини-станции · MediaWiki · интерфейс как на ministation.ru</p>
+	{{#data-footer}}
+		{{#data-places}}{{>FooterList}}{{/data-places}}
+		{{#data-icons}}{{>FooterList}}{{/data-icons}}
+	{{/data-footer}}
+</footer>

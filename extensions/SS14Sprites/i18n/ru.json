@@ -1,0 +1,6 @@
+{
+	"@metadata": {
+		"authors": [ "Mini Station" ]
+	},
+	"ss14sprites-desc": "Показывает спрайты SS14 RSI через {{#sprite:path/state|scale=N}}."
+}

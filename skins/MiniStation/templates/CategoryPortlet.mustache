@@ -1,0 +1,16 @@
+{{#is-article}}
+<div class="cats-wrap">
+	{{#data-category-normal}}
+	<ul class="cats">
+		{{#array-items}}{{>ListItem}}{{/array-items}}
+	</ul>
+	{{{html-after-portal}}}
+	{{/data-category-normal}}
+	{{#data-category-hidden}}
+	<ul class="cats cats--hidden">
+		{{#array-items}}{{>ListItem}}{{/array-items}}
+	</ul>
+	{{{html-after-portal}}}
+	{{/data-category-hidden}}
+</div>
+{{/is-article}}

@@ -1,0 +1,7 @@
+<nav id="{{id}}" class="side-portlet mw-portlet mw-portlet-{{name}} {{class}}" {{{html-tooltip}}} {{{html-user-language-attributes}}}>
+	{{#label}}<div class="side-portlet__label">{{.}}</div>{{/label}}
+	<ul>
+		{{#array-items}}{{>ListItem}}{{/array-items}}
+	</ul>
+	{{{html-after-portal}}}
+</nav>

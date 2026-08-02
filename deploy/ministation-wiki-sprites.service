@@ -1,0 +1,17 @@
+[Unit]
+Description=Mini Station Wiki RSI sprite service
+After=network.target
+PartOf=ministation-wiki.service
+
+[Service]
+Type=simple
+User=ss14_user
+Group=ss14_user
+WorkingDirectory=/home/ss14_user/ministation_wiki
+EnvironmentFile=/home/ss14_user/ministation_wiki/.env
+ExecStart=/home/ss14_user/ministation_wiki/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 3001
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

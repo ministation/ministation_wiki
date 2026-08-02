@@ -1,6 +1,7 @@
 [Unit]
-Description=Mini Station Wiki
-After=network.target
+Description=Mini Station Wiki (MediaWiki)
+After=network.target postgresql.service
+Wants=postgresql.service
 
 [Service]
 Type=simple
@@ -8,7 +9,8 @@ User=ss14_user
 Group=ss14_user
 WorkingDirectory=/home/ss14_user/ministation_wiki
 EnvironmentFile=/home/ss14_user/ministation_wiki/.env
-ExecStart=/home/ss14_user/ministation_wiki/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 3000
+Environment=MW_SERVER=https://wiki.ministation.ru
+ExecStart=/usr/bin/php -S 127.0.0.1:3000 /home/ss14_user/ministation_wiki/tools/php_router.php
 Restart=always
 RestartSec=5
 
