@@ -155,12 +155,15 @@ def write_bundled_loader(ext_names: list[str], skin_names: list[str]) -> Path:
         "",
     ]
     for name in skin_names:
-        lines.append(f"wfLoadSkin( '{name}' );")
+        lines.append(f"if ( is_file( \"$IP/skins/{name}/skin.json\" ) ) {{")
+        lines.append(f"\twfLoadSkin( '{name}' );")
+        lines.append("}")
     if skin_names:
         lines.append("")
     for name in ext_names:
-        # ConfirmEdit ships as ConfirmEdit; SyntaxHighlight uses folder name
-        lines.append(f"wfLoadExtension( '{name}' );")
+        lines.append(f"if ( is_file( \"$IP/extensions/{name}/extension.json\" ) ) {{")
+        lines.append(f"\twfLoadExtension( '{name}' );")
+        lines.append("}")
     lines.append("")
     bundled.write_text("\n".join(lines), encoding="utf-8")
     print(f"Wrote {bundled} ({len(ext_names)} extensions, {len(skin_names)} skins)")
@@ -170,12 +173,17 @@ def write_bundled_loader(ext_names: list[str], skin_names: list[str]) -> Path:
 def patch_custom_settings() -> None:
     """Ensure LocalSettings.custom.php requires the bundled loader."""
     CUSTOM_SETTINGS.parent.mkdir(parents=True, exist_ok=True)
+    bundled_require = (
+        "if ( is_file( __DIR__ . '/LocalSettings.bundled.php' ) ) {\n"
+        "    require_once __DIR__ . '/LocalSettings.bundled.php';\n"
+        "}\n"
+    )
     if not CUSTOM_SETTINGS.is_file():
         # setup not finished yet — write a stub that setup will overwrite/extend
         CUSTOM_SETTINGS.write_text(
             "<?php\n"
             f"{BUNDLED_MARKER_BEGIN}\n"
-            "require_once __DIR__ . '/LocalSettings.bundled.php';\n"
+            f"{bundled_require}"
             f"{BUNDLED_MARKER_END}\n",
             encoding="utf-8",
         )
@@ -185,7 +193,7 @@ def patch_custom_settings() -> None:
     text = CUSTOM_SETTINGS.read_text(encoding="utf-8")
     block = (
         f"{BUNDLED_MARKER_BEGIN}\n"
-        "require_once __DIR__ . '/LocalSettings.bundled.php';\n"
+        f"{bundled_require}"
         f"{BUNDLED_MARKER_END}\n"
     )
     if BUNDLED_MARKER_BEGIN in text and BUNDLED_MARKER_END in text:

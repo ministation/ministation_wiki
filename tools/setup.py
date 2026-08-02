@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -455,10 +456,53 @@ def install_mediawiki() -> None:
 CUSTOM_MARKER = "# BEGIN ministation_custom"
 
 
+def sanitize_bundled_loader() -> None:
+    """Wrap bare wfLoad* calls so missing extensions do not fatal the wiki."""
+    bundled = CUSTOM_SETTINGS.parent / "LocalSettings.bundled.php"
+    if not bundled.is_file():
+        return
+    text = bundled.read_text(encoding="utf-8")
+    if 'is_file( "$IP/' in text:
+        return
+
+    def wrap_skin(m: re.Match[str]) -> str:
+        name = m.group(1)
+        return (
+            f'if ( is_file( "$IP/skins/{name}/skin.json" ) ) {{\n'
+            f"\twfLoadSkin( '{name}' );\n"
+            f"}}"
+        )
+
+    def wrap_ext(m: re.Match[str]) -> str:
+        name = m.group(1)
+        return (
+            f'if ( is_file( "$IP/extensions/{name}/extension.json" ) ) {{\n'
+            f"\twfLoadExtension( '{name}' );\n"
+            f"}}"
+        )
+
+    new = re.sub(
+        r"^\s*wfLoadSkin\(\s*'([^']+)'\s*\)\s*;\s*$",
+        wrap_skin,
+        text,
+        flags=re.MULTILINE,
+    )
+    new = re.sub(
+        r"^\s*wfLoadExtension\(\s*'([^']+)'\s*\)\s*;\s*$",
+        wrap_ext,
+        new,
+        flags=re.MULTILINE,
+    )
+    if new != text:
+        bundled.write_text(new, encoding="utf-8")
+        print(f"Sanitized {bundled} (guard missing packages)")
+
+
 def write_custom_settings_snippet() -> None:
     """Ensure LocalSettings.php requires our custom overrides."""
     CUSTOM_SETTINGS.parent.mkdir(parents=True, exist_ok=True)
     from tools.config import MAIN_SITE_URL
+    sanitize_bundled_loader()
 
     # Never put WIKI_HOST (e.g. 0.0.0.0) into $wgServer — browsers cannot use it.
     custom = f"""<?php
@@ -485,9 +529,23 @@ $wgArticlePath = "/index.php?title=$1";
 $wgDefaultSkin = 'ministation';
 $wgDefaultUserOptions['skin'] = 'ministation';
 
-wfLoadSkin('MiniStation');
-wfLoadExtension('SS14Sprites');
-wfLoadExtension('ParserFunctions');
+# Debug (turn off later on production)
+$wgShowExceptionDetails = true;
+$wgShowDBErrorBacktrace = true;
+$wgShowSQLErrors = true;
+
+# Load only if present (bare git install has no ParserFunctions until `tools extensions`)
+if ( is_file( "$IP/skins/MiniStation/skin.json" ) ) {{
+	wfLoadSkin( 'MiniStation' );
+}} else {{
+	$wgDefaultSkin = 'fallback';
+}}
+if ( is_file( "$IP/extensions/SS14Sprites/extension.json" ) ) {{
+	wfLoadExtension( 'SS14Sprites' );
+}}
+if ( is_file( "$IP/extensions/ParserFunctions/extension.json" ) ) {{
+	wfLoadExtension( 'ParserFunctions' );
+}}
 
 $wgSS14SpriteServiceUrl = getenv('SPRITE_PUBLIC_URL') ?: {SPRITE_PUBLIC_URL!r};
 $wgMainSiteUrl = {MAIN_SITE_URL!r};
