@@ -1,0 +1,16 @@
+[Unit]
+Description=Mini Station Wiki
+After=network.target
+
+[Service]
+Type=simple
+User=ss14_user
+Group=ss14_user
+WorkingDirectory=/home/ss14_user/ministation_wiki
+EnvironmentFile=/home/ss14_user/ministation_wiki/.env
+ExecStart=/home/ss14_user/ministation_wiki/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 3000
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

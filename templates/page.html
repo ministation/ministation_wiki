@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ page.title }} — {{ site_name }}{% endblock %}
+{% block content %}
+<article class="wiki-page">
+  <header class="page-head">
+    <p class="breadcrumb">
+      <a href="/wiki/Main_Page">Вики</a>
+      {% for part in page.slug.split('/') %}
+        <span>/</span>
+        {% if loop.last %}
+          <span>{{ part.replace('_', ' ') }}</span>
+        {% else %}
+          <a href="/wiki/{{ page.slug.split('/')[:loop.index]|join('/') }}">{{ part.replace('_', ' ') }}</a>
+        {% endif %}
+      {% endfor %}
+    </p>
+    <h1 class="page-title">{{ page.title }}</h1>
+    {% if page.categories %}
+    <ul class="cats">
+      {% for c in page.categories %}
+      <li><a href="/category/{{ c }}">{{ c }}</a></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </header>
+
+  <div class="wiki-body prose">
+    {{ content_html | safe }}
+  </div>
+
+  {% if related %}
+  <section class="related">
+    <h2>См. также</h2>
+    <ul>
+      {% for r in related %}
+      <li><a href="{{ r.url }}">{{ r.title }}</a></li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+</article>
+{% endblock %}

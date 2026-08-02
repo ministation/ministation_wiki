@@ -1,0 +1,7 @@
+# Snippet for wiki.ministation.ru (merge into /etc/caddy/Caddyfile)
+# Requires Certbot cert already used by other hosts.
+
+wiki.ministation.ru {
+	import tls_ministation
+	reverse_proxy 127.0.0.1:3000
+}

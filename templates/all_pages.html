@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Все страницы — {{ site_name }}{% endblock %}
+{% block content %}
+<section class="wiki-page">
+  <header class="page-head">
+    <h1 class="page-title">Все страницы</h1>
+    <p class="lede">{{ pages|length }} статей</p>
+  </header>
+  <ul class="page-list">
+    {% for p in pages %}
+    <li><a href="{{ p.url }}">{{ p.title }}</a> <span class="muted">{{ p.slug }}</span></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

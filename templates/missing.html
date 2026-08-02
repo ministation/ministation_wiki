@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Страница не найдена — {{ site_name }}{% endblock %}
+{% block content %}
+<section class="wiki-page">
+  <header class="page-head">
+    <h1 class="page-title">Нет такой страницы</h1>
+    <p class="lede">«{{ slug }}» ещё не создана. Добавьте файл <code>content/ru/{{ slug }}.md</code>.</p>
+  </header>
+  {% if suggestions %}
+  <h2>Похожее</h2>
+  <ul class="page-list">
+    {% for page, snippet in suggestions %}
+    <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</section>
+{% endblock %}

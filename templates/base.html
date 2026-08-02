@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ site_name }}{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/wiki.css">
+  <script src="/static/js/theme.js"></script>
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="logo" href="/wiki/Main_Page">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span class="logo-text">Мини<span>-</span>вики</span>
+      </a>
+      <form class="search" action="/search" method="get" role="search">
+        <label class="sr-only" for="q">Поиск</label>
+        <input id="q" name="q" type="search" placeholder="Поиск по вики…" value="{{ query|default('') }}" autocomplete="off">
+        <button type="submit" aria-label="Искать"><i class="fa-solid fa-magnifying-glass"></i></button>
+      </form>
+      <div class="topbar-actions">
+        <button type="button" class="icon-btn" id="themeToggle" title="Тема" aria-label="Сменить тему">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+        <a class="btn btn-ghost" href="{{ main_site_url }}" target="_blank" rel="noopener">Сайт</a>
+        <a class="btn btn-accent" href="/special/all">Все страницы</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="side-group">
+        <div class="side-title">Навигация</div>
+        <a class="side-link" href="/wiki/Main_Page"><i class="fa-solid fa-house"></i> Главная</a>
+        <a class="side-link" href="/wiki/Guides"><i class="fa-solid fa-book"></i> Гайды</a>
+        <a class="side-link" href="/wiki/Jobs"><i class="fa-solid fa-user-astronaut"></i> Роли</a>
+        <a class="side-link" href="/wiki/Items"><i class="fa-solid fa-box"></i> Предметы</a>
+        <a class="side-link" href="/category/Механики"><i class="fa-solid fa-gears"></i> Механики</a>
+      </div>
+      <div class="side-group">
+        <div class="side-title">Ссылки</div>
+        <a class="side-link" href="{{ main_site_url }}" target="_blank" rel="noopener"><i class="fa-solid fa-globe"></i> Мини-станция</a>
+        <a class="side-link" href="https://discord.gg/mini-station" target="_blank" rel="noopener"><i class="fa-brands fa-discord"></i> Discord</a>
+      </div>
+      {% if not has_sprites %}
+      <div class="side-note">
+        Спрайты выкл. Укажите <code>SS14_RESOURCES</code> в `.env`.
+      </div>
+      {% endif %}
+      {% block sidebar_extra %}{% endblock %}
+    </aside>
+
+    <main class="content">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <footer class="footer">
+    <p>Вики Мини-станции · движок под SS14 · интерфейс как на <a href="{{ main_site_url }}">ministation.ru</a></p>
+  </footer>
+  <script src="/static/js/wiki.js"></script>
+</body>
+</html>
