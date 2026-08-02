@@ -80,25 +80,33 @@ def _git_clone(url: str, dest: Path, branch: str) -> None:
         print(f"  update {dest.name}…")
         subprocess.run(["git", "-C", str(dest), "fetch", "--depth", "1", "origin", branch], check=False)
         subprocess.run(["git", "-C", str(dest), "checkout", "-f", "FETCH_HEAD"], check=False)
-        return
-    if dest.exists():
-        shutil.rmtree(dest)
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    print(f"  clone {dest.name} ({branch})…")
-    try:
+    else:
+        if dest.exists():
+            shutil.rmtree(dest)
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        print(f"  clone {dest.name} ({branch})…")
+        try:
+            subprocess.run(
+                ["git", "clone", "--depth", "1", "--branch", branch, url, str(dest)],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+        except subprocess.CalledProcessError:
+            # fallback without branch tip name (some repos use different default)
+            subprocess.run(
+                ["git", "clone", "--depth", "1", url, str(dest)],
+                check=True,
+            )
+            subprocess.run(["git", "-C", str(dest), "checkout", branch], check=False)
+
+    # VisualEditor (and similar) ship assets via git submodules
+    if (dest / ".gitmodules").is_file():
+        print(f"  submodule init {dest.name}…")
         subprocess.run(
-            ["git", "clone", "--depth", "1", "--branch", branch, url, str(dest)],
-            check=True,
-            capture_output=True,
-            text=True,
+            ["git", "-C", str(dest), "submodule", "update", "--init", "--depth", "1"],
+            check=False,
         )
-    except subprocess.CalledProcessError:
-        # fallback without branch tip name (some repos use different default)
-        subprocess.run(
-            ["git", "clone", "--depth", "1", url, str(dest)],
-            check=True,
-        )
-        subprocess.run(["git", "-C", str(dest), "checkout", branch], check=False)
 
 
 def clone_bundled(modules: list[Submodule]) -> tuple[list[str], list[str]]:
@@ -234,6 +242,15 @@ def write_bundled_loader(ext_names: list[str], skin_names: list[str]) -> Path:
     if skin_names:
         lines.append("")
     for name in ext_names:
+        # VisualEditor without lib/ve submodule breaks ResourceLoader (no styles/scripts).
+        if name == "VisualEditor":
+            lines.append(
+                'if ( is_file( "$IP/extensions/VisualEditor/extension.json" )'
+                ' && is_file( "$IP/extensions/VisualEditor/lib/ve/build/modules.json" ) ) {'
+            )
+            lines.append("\twfLoadExtension( 'VisualEditor' );")
+            lines.append("}")
+            continue
         lines.append(f"if ( is_file( \"$IP/extensions/{name}/extension.json\" ) ) {{")
         lines.append(f"\twfLoadExtension( '{name}' );")
         lines.append("}")

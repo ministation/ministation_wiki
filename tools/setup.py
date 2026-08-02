@@ -462,40 +462,74 @@ def sanitize_bundled_loader() -> None:
     if not bundled.is_file():
         return
     text = bundled.read_text(encoding="utf-8")
-    if 'is_file( "$IP/' in text:
-        return
+    original = text
 
-    def wrap_skin(m: re.Match[str]) -> str:
-        name = m.group(1)
-        return (
-            f'if ( is_file( "$IP/skins/{name}/skin.json" ) ) {{\n'
-            f"\twfLoadSkin( '{name}' );\n"
-            f"}}"
-        )
-
-    def wrap_ext(m: re.Match[str]) -> str:
-        name = m.group(1)
-        return (
-            f'if ( is_file( "$IP/extensions/{name}/extension.json" ) ) {{\n'
-            f"\twfLoadExtension( '{name}' );\n"
-            f"}}"
-        )
-
-    new = re.sub(
-        r"^\s*wfLoadSkin\(\s*'([^']+)'\s*\)\s*;\s*$",
-        wrap_skin,
+    # VisualEditor without submodule assets breaks ResourceLoader CSS/JS.
+    text = re.sub(
+        r"^\s*wfLoadExtension\(\s*'VisualEditor'\s*\)\s*;\s*$",
+        (
+            "if ( is_file( \"$IP/extensions/VisualEditor/extension.json\" ) "
+            "&& is_file( \"$IP/extensions/VisualEditor/lib/ve/build/modules.json\" ) ) {\n"
+            "\twfLoadExtension( 'VisualEditor' );\n"
+            "}"
+        ),
         text,
         flags=re.MULTILINE,
     )
-    new = re.sub(
-        r"^\s*wfLoadExtension\(\s*'([^']+)'\s*\)\s*;\s*$",
-        wrap_ext,
-        new,
-        flags=re.MULTILINE,
+    # Also fix already-guarded-but-incomplete VE loads (extension.json only).
+    text = re.sub(
+        r"if \(\s*is_file\(\s*\"\$IP/extensions/VisualEditor/extension\.json\"\s*\)\s*\)\s*\{\s*"
+        r"wfLoadExtension\(\s*'VisualEditor'\s*\)\s*;\s*\}",
+        (
+            'if ( is_file( "$IP/extensions/VisualEditor/extension.json" ) '
+            '&& is_file( "$IP/extensions/VisualEditor/lib/ve/build/modules.json" ) ) {\n'
+            "\twfLoadExtension( 'VisualEditor' );\n"
+            "}"
+        ),
+        text,
+        flags=re.MULTILINE | re.DOTALL,
     )
-    if new != text:
-        bundled.write_text(new, encoding="utf-8")
-        print(f"Sanitized {bundled} (guard missing packages)")
+
+    if 'is_file( "$IP/' not in text:
+        def wrap_skin(m: re.Match[str]) -> str:
+            name = m.group(1)
+            return (
+                f'if ( is_file( "$IP/skins/{name}/skin.json" ) ) {{\n'
+                f"\twfLoadSkin( '{name}' );\n"
+                f"}}"
+            )
+
+        def wrap_ext(m: re.Match[str]) -> str:
+            name = m.group(1)
+            if name == "VisualEditor":
+                return (
+                    'if ( is_file( "$IP/extensions/VisualEditor/extension.json" ) '
+                    '&& is_file( "$IP/extensions/VisualEditor/lib/ve/build/modules.json" ) ) {\n'
+                    "\twfLoadExtension( 'VisualEditor' );\n"
+                    "}"
+                )
+            return (
+                f'if ( is_file( "$IP/extensions/{name}/extension.json" ) ) {{\n'
+                f"\twfLoadExtension( '{name}' );\n"
+                f"}}"
+            )
+
+        text = re.sub(
+            r"^\s*wfLoadSkin\(\s*'([^']+)'\s*\)\s*;\s*$",
+            wrap_skin,
+            text,
+            flags=re.MULTILINE,
+        )
+        text = re.sub(
+            r"^\s*wfLoadExtension\(\s*'([^']+)'\s*\)\s*;\s*$",
+            wrap_ext,
+            text,
+            flags=re.MULTILINE,
+        )
+
+    if text != original:
+        bundled.write_text(text, encoding="utf-8")
+        print(f"Sanitized {bundled} (guard missing / incomplete packages)")
 
 
 def write_custom_settings_snippet() -> None:
@@ -555,6 +589,16 @@ $wgMainPage = 'Main Page';
 
 # Prefer UTF-8 / Russian search niceties
 $wgCapitalLinks = true;
+
+# Direct CSS fallback (php -S / RL glitches must not leave the skin unstyled)
+$wgHooks['BeforePageDisplay'][] = static function ( $out, $skin ): void {{
+	if ( $skin->getSkinName() !== 'ministation' ) {{
+		return;
+	}}
+	global $wgScriptPath;
+	$href = rtrim( (string)$wgScriptPath, '/' ) . '/skins/MiniStation/resources/skin.css';
+	$out->addStyle( $href, 'screen' );
+}};
 
 # BEGIN ministation_bundled
 if ( is_file( __DIR__ . '/LocalSettings.bundled.php' ) ) {{
