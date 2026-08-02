@@ -54,21 +54,22 @@ python -m tools start     # MediaWiki :3000 + sprites :3001
 | `python -m tools extensions` | Официальные bundled расширения/скины (Cite, VisualEditor, …) |
 | `python -m tools sprites` | Sparse-clone `Resources/Textures` из git для `{{#sprite:}}` |
 | `python -m tools db` | только PostgreSQL |
-| `python -m tools migrate` | Markdown → wikitext → страницы MW |
-| `python -m tools import_remote seed` | Скачать сиды с Corvax + МК → `content/import/` |
-| `python -m tools import_remote apply` | Залить импорт в локальную MediaWiki |
+| `python -m tools migrate` | Markdown → страницы (+ apply `content/import` если есть) |
+| `python -m tools migrate --seed` | Скачать Corvax/MK сиды и залить всё в вики |
 | `python -m tools start` | `php -S` + uvicorn спрайтов |
 
 ## Наполнение контентом
 
 ```bash
+# одним заходом: скачать сиды + свои md + залить в MW
+python -m tools migrate --seed
+
+# или по шагам
 python -m tools import_remote seed
-python -m tools import_remote fetch corvax --category Руководства --limit 40
-python -m tools import_remote fetch mk --titles "Руководство для новичков" Медицина
-python -m tools import_remote apply
+python -m tools migrate
 ```
 
-Страницы попадают в вики как обычный контент Мини-станции (без пометок источника).
+Главная страница вики (ru) — **Заглавная страница** (с шапкой как на сайте).
 
 ## Релиз на VPS (чеклист)
 

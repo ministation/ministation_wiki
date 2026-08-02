@@ -7,7 +7,7 @@ from pathlib import Path
 
 import yaml
 
-from tools.config import CONTENT_DIR, MW_ADMIN, MW_DIR, PHP_BIN
+from tools.config import CONTENT_DIR, MW_ADMIN, MW_DIR, MW_LANG, PHP_BIN
 
 SPRITE_RE = re.compile(
     r"\{\{sprite:([^}|]+)(?:\|([^}]+))?\}\}",
@@ -35,21 +35,8 @@ INFOBOX_TEMPLATE = """<div class="wiki-infobox">
 </div>
 """
 
-# 1:1 with ministation.ru home hero; Wiki button → Сайт
-MS_HERO_TEMPLATE = """<div class="card hero-card hero-top ms-hero">
-<h2 class="hero-brand">Мини<span>-</span>станция</h2>
-<span class="tagline">Космическая станция 14</span>
-<p class="description">Мини-станция - это некоммерческий, самый безбашенный проект в игре Космическая станция 14, где ты сможешь как вдоволь поучаствовать в эпичных баталиях, так и показать свой ролевой отыгрыш.</p>
-<div class="social-links">
-<a href="http://cdn.ministation.ru/" target="_blank" rel="noopener" class="link-btn website"><i class="fa-solid fa-cloud"></i> CDN</a>
-<a href="https://discord.gg/mini-station" target="_blank" rel="noopener" class="link-btn discord"><i class="fa-brands fa-discord"></i> Discord</a>
-<a href="https://t.me/mini_station" target="_blank" rel="noopener" class="link-btn telegram"><i class="fa-brands fa-telegram"></i> Telegram</a>
-<a href="https://ministation.ru" target="_blank" rel="noopener" class="link-btn wiki"><i class="fa-solid fa-globe"></i> Сайт</a>
-<a href="https://ministation.ru/donate" target="_blank" rel="noopener" class="link-btn boosty"><i class="fa-solid fa-heart"></i> Донат</a>
-<a href="https://github.com/ministation/mini-station-goob" target="_blank" rel="noopener" class="link-btn github"><i class="fa-brands fa-github"></i> GitHub</a>
-</div>
-</div>
-"""
+# Hero is injected on the main page via OutputPageBeforeHTML (tools/setup.py).
+# Never put raw <a href> HTML into wikitext — MW shows it as escaped garbage.
 
 
 def parse_frontmatter(text: str) -> tuple[dict, str]:
@@ -275,11 +262,19 @@ def md_to_wikitext(body: str) -> str:
 
 
 def page_title_from_path(path: Path) -> str:
-    return path.stem.replace("_", " ")
+    stem = path.stem
+    # Russian MediaWiki main page is «Заглавная страница», not «Main Page»
+    if stem in ("Main_Page", "Main Page", "Заглавная_страница"):
+        if MW_LANG.lower().startswith("ru"):
+            return "Заглавная страница"
+        return "Main Page"
+    return stem.replace("_", " ")
 
 
 def build_page(meta: dict, body: str) -> str:
     wikitext = md_to_wikitext(body)
+    # Strip obsolete hero template calls (hero is PHP-injected on main page)
+    wikitext = re.sub(r"\{\{\s*MsHero\s*\}\}", "", wikitext, flags=re.I)
     cats = meta.get("categories") or []
     if isinstance(cats, str):
         cats = [cats]
@@ -321,35 +316,76 @@ def edit_page(title: str, text: str, summary: str = "import from content/ru") ->
 
 def ensure_infobox_template() -> None:
     edit_page("Template:Infobox", INFOBOX_TEMPLATE, summary="ensure Infobox template")
-    edit_page("Template:MsHero", MS_HERO_TEMPLATE, summary="ensure MiniStation home hero")
 
 
-def migrate() -> None:
+def migrate(*, seed_remote: bool = False, apply_remote: bool = True) -> None:
     if not (MW_DIR / "LocalSettings.php").is_file():
         raise SystemExit("MediaWiki is not installed. Run: python -m tools setup")
     if not CONTENT_DIR.is_dir():
         raise SystemExit(f"Content dir missing: {CONTENT_DIR}")
 
+    # Refresh LocalSettings.custom (main page title, inline CSS, …)
+    try:
+        from tools.setup import write_custom_settings_snippet
+
+        write_custom_settings_snippet()
+    except Exception as e:  # noqa: BLE001
+        print(f"WARNING: could not refresh LocalSettings.custom.php: {e}")
+
     ensure_infobox_template()
     files = sorted(CONTENT_DIR.glob("*.md"))
     if not files:
         print("No markdown files found.")
-        return
     for path in files:
         raw = path.read_text(encoding="utf-8")
         meta, body = parse_frontmatter(raw)
         title = page_title_from_path(path)
         text = build_page(meta, body)
         edit_page(title, text)
-    print(f"Migrated {len(files)} page(s).")
+
+    # Keep English title as redirect for old links / $wgMainPage mistakes
+    if MW_LANG.lower().startswith("ru"):
+        edit_page(
+            "Main Page",
+            "#REDIRECT [[Заглавная страница]]\n",
+            summary="redirect to Russian main page",
+        )
+
+    print(f"Migrated {len(files)} markdown page(s).")
+
+    if seed_remote:
+        from tools.import_remote import cmd_seed
+
+        print("\nFetching remote content…")
+        cmd_seed()
+
+    from tools.import_remote import IMPORT_DIR, cmd_apply
+
+    wiki_files = list(IMPORT_DIR.rglob("*.wiki")) if IMPORT_DIR.is_dir() else []
+    if apply_remote and wiki_files:
+        print(f"\nApplying {len(wiki_files)} imported page(s)…")
+        cmd_apply()
+    elif apply_remote and not wiki_files:
+        print(
+            "\nNo content/import/*.wiki yet. To pull Corvax/MK pages:\n"
+            "  python -m tools migrate --seed\n"
+            "or: python -m tools import_remote seed && python -m tools migrate"
+        )
 
 
 def main(argv: list[str] | None = None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
     if argv and argv[0] in ("-h", "--help"):
-        print("Usage: python -m tools migrate\nImport content/ru/*.md into MediaWiki.")
+        print(
+            "Usage: python -m tools migrate [--seed] [--no-import]\n"
+            "  Import content/ru/*.md into MediaWiki (Заглавная страница + pages).\n"
+            "  --seed       also download Corvax/MK seed pages first\n"
+            "  --no-import  skip applying content/import/*.wiki"
+        )
         return 0
-    migrate()
+    seed = "--seed" in argv
+    apply_remote = "--no-import" not in argv
+    migrate(seed_remote=seed, apply_remote=apply_remote)
     return 0
 
 

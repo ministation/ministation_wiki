@@ -602,19 +602,53 @@ $wgSS14SpriteServiceUrl = getenv('SPRITE_PUBLIC_URL') ?: {SPRITE_PUBLIC_URL!r};
 $wgMainSiteUrl = {MAIN_SITE_URL!r};
 $wgEnableUploads = true;
 $wgUseInstantCommons = false;
-$wgMainPage = 'Main Page';
+$wgMainPage = 'Заглавная страница';
 
 # Prefer UTF-8 / Russian search niceties
 $wgCapitalLinks = true;
 
-# Direct CSS fallback (php -S / RL glitches must not leave the skin unstyled)
+# Styles: inline skin.css so php -S / RL cannot leave the wiki unstyled
 $wgHooks['BeforePageDisplay'][] = static function ( $out, $skin ): void {{
 	if ( $skin->getSkinName() !== 'ministation' ) {{
 		return;
 	}}
-	global $wgScriptPath;
-	$href = rtrim( (string)$wgScriptPath, '/' ) . '/skins/MiniStation/resources/skin.css?v=20260802e';
+	global $IP, $wgScriptPath;
+	$cssPath = "$IP/skins/MiniStation/resources/skin.css";
+	if ( is_file( $cssPath ) ) {{
+		$css = file_get_contents( $cssPath );
+		if ( is_string( $css ) && $css !== '' ) {{
+			$out->addInlineStyle( $css );
+		}}
+	}}
+	$href = rtrim( (string)$wgScriptPath, '/' ) . '/skins/MiniStation/resources/skin.css?v=20260802g';
 	$out->addStyle( $href, 'screen' );
+}};
+
+# Home hero (real HTML — never put <a> blocks in wikitext)
+$wgHooks['OutputPageBeforeHTML'][] = static function ( $out, &$text ): void {{
+	$title = $out->getTitle();
+	if ( !$title || !$title->isMainPage() ) {{
+		return;
+	}}
+	if ( str_contains( $text, 'id="ms-hero"' ) ) {{
+		return;
+	}}
+	$hero = <<<'MS_HERO'
+<div class="card hero-card hero-top ms-hero" id="ms-hero">
+<h2 class="hero-brand">Мини<span>-</span>станция</h2>
+<span class="tagline">Космическая станция 14</span>
+<p class="description">Мини-станция - это некоммерческий, самый безбашенный проект в игре Космическая станция 14, где ты сможешь как вдоволь поучаствовать в эпичных баталиях, так и показать свой ролевой отыгрыш.</p>
+<div class="social-links">
+<a class="link-btn website" href="http://cdn.ministation.ru/" target="_blank" rel="noopener"><i class="fa-solid fa-cloud" aria-hidden="true"></i> CDN</a>
+<a class="link-btn discord" href="https://discord.gg/mini-station" target="_blank" rel="noopener"><i class="fa-brands fa-discord" aria-hidden="true"></i> Discord</a>
+<a class="link-btn telegram" href="https://t.me/mini_station" target="_blank" rel="noopener"><i class="fa-brands fa-telegram" aria-hidden="true"></i> Telegram</a>
+<a class="link-btn wiki" href="https://ministation.ru" target="_blank" rel="noopener"><i class="fa-solid fa-globe" aria-hidden="true"></i> Сайт</a>
+<a class="link-btn boosty" href="https://ministation.ru/donate" target="_blank" rel="noopener"><i class="fa-solid fa-heart" aria-hidden="true"></i> Донат</a>
+<a class="link-btn github" href="https://github.com/ministation/mini-station-goob" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i> GitHub</a>
+</div>
+</div>
+MS_HERO;
+	$text = $hero . $text;
 }};
 
 # BEGIN ministation_bundled
