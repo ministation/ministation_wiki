@@ -51,12 +51,21 @@ python -m tools start     # MediaWiki :3000 + sprites :3001
 | Команда | Назначение |
 |---------|------------|
 | `python -m tools setup` | PHP-check, MediaWiki, Postgres, install.php |
-| `python -m tools extensions` | Все **официальные bundled** расширения/скины релиза (Cite, VisualEditor, Scribunto, …) |
+| `python -m tools extensions` | Официальные bundled расширения/скины (Cite, VisualEditor, …) |
+| `python -m tools sprites` | Sparse-clone `Resources/Textures` из git для `{{#sprite:}}` |
 | `python -m tools db` | только PostgreSQL |
 | `python -m tools migrate` | Markdown → wikitext → страницы MW |
 | `python -m tools start` | `php -S` + uvicorn спрайтов |
 
 ## Спрайты
+
+Скачать все текстуры из git (только `Resources/Textures`, sparse clone):
+
+```bash
+python -m tools sprites
+# форк Мини-станции / Goob:
+# SS14_RESOURCES_GIT=https://github.com/Goob-Station/Goob-Station.git python -m tools sprites
+```
 
 В статьях MediaWiki:
 
@@ -64,10 +73,10 @@ python -m tools start     # MediaWiki :3000 + sprites :3001
 {{#sprite:Objects/Weapons/Melee/knife.rsi/icon|scale=3}}
 ```
 
-Нужен `SS14_RESOURCES` (папка `Resources` билда со `Textures/`).  
-HTTP: `GET http://127.0.0.1:3001/sprite/…`
+Нужны запущенный sprite-сервис (`python -m tools start`) и `SS14_RESOURCES` (пишется в `.env` командой `sprites`).
 
-Публичный URL для картинок задаётся `SPRITE_PUBLIC_URL` (за Caddy обычно `https://wiki.ministation.ru/sprite` или отдельный прокси).
+HTTP: `GET http://127.0.0.1:3001/sprite/…`  
+Публичный URL: `SPRITE_PUBLIC_URL` (за Caddy — `https://wiki.ministation.ru`).
 
 ## Структура
 

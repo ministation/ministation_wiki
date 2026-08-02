@@ -4,6 +4,7 @@ __pycache__/
 .env
 data/sprite_cache/
 data/cache/
+data/ss14_repo/
 *.egg-info/
 .DS_Store
 .idea/

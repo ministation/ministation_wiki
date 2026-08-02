@@ -7,19 +7,20 @@
 
   var key = "ms-wiki-theme";
   var root = document.documentElement;
+
   function apply(theme) {
     root.setAttribute("data-theme", theme);
     try {
       localStorage.setItem(key, theme);
     } catch (e) {}
   }
+
   var saved = null;
   try {
     saved = localStorage.getItem(key);
   } catch (e) {}
-  var prefersDark =
-    window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-  apply(saved || (prefersDark ? "dark" : "light"));
+  // Site default is dark (ministation.ru atmosphere)
+  apply(saved || "dark");
 
   function bind() {
     var btn = document.getElementById("themeToggle");

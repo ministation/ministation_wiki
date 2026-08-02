@@ -12,6 +12,7 @@ def main(argv: list[str] | None = None) -> int:
             "  setup       Download MediaWiki, create Postgres DB, install, link skin/ext\n"
             "  db          Create wiki PostgreSQL role/database/schema only\n"
             "  extensions  Clone+enable official bundled extensions/skins for this MW version\n"
+            "  sprites     Sparse-clone SS14 Resources/Textures from git for {{#sprite:}}\n"
             "  migrate     Import content/ru Markdown into MediaWiki\n"
             "  start       Run MediaWiki (php -S) + sprite service (uvicorn)\n"
         )
@@ -30,6 +31,10 @@ def main(argv: list[str] | None = None) -> int:
         from tools.extensions import main as extensions_main
 
         return extensions_main(rest)
+    if cmd == "sprites":
+        from tools.sprites import main as sprites_main
+
+        return sprites_main(rest)
     if cmd == "migrate":
         from tools.migrate import main as migrate_main
 
