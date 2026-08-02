@@ -613,15 +613,22 @@ $wgHooks['BeforePageDisplay'][] = static function ( $out, $skin ): void {{
 		return;
 	}}
 	global $IP, $wgScriptPath;
-	$cssPath = "$IP/skins/MiniStation/resources/skin.css";
-	if ( is_file( $cssPath ) ) {{
-		$css = file_get_contents( $cssPath );
-		if ( is_string( $css ) && $css !== '' ) {{
-			$out->addInlineStyle( $css );
+	$cssFiles = [
+		'skin.css',
+		'mainpage-widgets.css',
+	];
+	foreach ( $cssFiles as $cssFile ) {{
+		$cssPath = "$IP/skins/MiniStation/resources/" . $cssFile;
+		if ( is_file( $cssPath ) ) {{
+			$css = file_get_contents( $cssPath );
+			if ( is_string( $css ) && $css !== '' ) {{
+				$out->addInlineStyle( $css );
+			}}
 		}}
 	}}
-	$href = rtrim( (string)$wgScriptPath, '/' ) . '/skins/MiniStation/resources/skin.css?v=20260802g';
-	$out->addStyle( $href, 'screen' );
+	$base = rtrim( (string)$wgScriptPath, '/' ) . '/skins/MiniStation/resources/';
+	$out->addStyle( $base . 'skin.css?v=20260802h', 'screen' );
+	$out->addStyle( $base . 'mainpage-widgets.css?v=20260802a', 'screen' );
 }};
 
 # Home hero (real HTML — never put <a> blocks in wikitext)

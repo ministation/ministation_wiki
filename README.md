@@ -55,7 +55,7 @@ python -m tools start     # MediaWiki :3000 + sprites :3001
 | `python -m tools sprites` | Sparse-clone `Resources/Textures` из git для `{{#sprite:}}` |
 | `python -m tools db` | только PostgreSQL |
 | `python -m tools migrate` | Markdown → страницы (+ apply `content/import` если есть) |
-| `python -m tools migrate --seed` | Скачать Corvax/MK сиды и залить всё в вики |
+| `python -m tools migrate --seed` | Скачать remote-сиды и залить всё в вики |
 | `python -m tools start` | `php -S` + uvicorn спрайтов |
 
 ## Наполнение контентом

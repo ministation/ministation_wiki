@@ -62,7 +62,7 @@
 				"toc": true,
 				"logo": true
 			},
-			"styles": [ "resources/skin.css" ]
+			"styles": [ "resources/skin.css", "resources/mainpage-widgets.css" ]
 		},
 		"skins.ministation": {
 			"scripts": [ "resources/skin.js" ]

@@ -14,7 +14,7 @@ def main(argv: list[str] | None = None) -> int:
             "  extensions  Clone+enable official bundled extensions/skins for this MW version\n"
             "  sprites     Sparse-clone SS14 Resources/Textures from git for {{#sprite:}}\n"
             "  migrate     Import content/ru Markdown into MediaWiki\n"
-            "  import_remote  Fetch pages from Corvax/МК wikis into content/import\n"
+            "  import_remote  Fetch remote wiki pages into content/import\n"
             "  start       Run MediaWiki (php -S) + sprite service (uvicorn)\n"
         )
         return 0

@@ -927,7 +927,7 @@ body {
 #ms-hero .social-links a.boosty { background: #ef6537 !important; }
 #ms-hero .social-links a.github { background: #3d434d !important; }
 
-/* === SS220-like main page grid === */
+/* === Main page grid === */
 .wiki-mainpage {
   display: flex;
   flex-wrap: wrap;

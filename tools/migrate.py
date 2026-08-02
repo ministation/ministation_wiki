@@ -367,7 +367,7 @@ def migrate(*, seed_remote: bool = False, apply_remote: bool = True) -> None:
         cmd_apply()
     elif apply_remote and not wiki_files:
         print(
-            "\nNo content/import/*.wiki yet. To pull Corvax/MK pages:\n"
+            "\nNo content/import/*.wiki yet. To pull remote pages:\n"
             "  python -m tools migrate --seed\n"
             "or: python -m tools import_remote seed && python -m tools migrate"
         )
@@ -379,7 +379,7 @@ def main(argv: list[str] | None = None) -> int:
         print(
             "Usage: python -m tools migrate [--seed] [--no-import]\n"
             "  Import content/ru/*.md into MediaWiki (Заглавная страница + pages).\n"
-            "  --seed       also download Corvax/MK seed pages first\n"
+            "  --seed       also download remote seed pages first\n"
             "  --no-import  skip applying content/import/*.wiki"
         )
         return 0
