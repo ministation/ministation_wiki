@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import signal
 import subprocess
 import sys
@@ -9,6 +10,7 @@ from pathlib import Path
 from tools.config import (
     BASE_DIR,
     MW_DIR,
+    MW_SERVER,
     PHP_BIN,
     SITE_PUBLIC_URL,
     SPRITE_HOST,
@@ -19,6 +21,16 @@ from tools.config import (
 )
 
 ROUTER = BASE_DIR / "tools" / "php_router.php"
+
+
+def _child_env() -> dict[str, str]:
+    """Pass wiki public URLs into PHP (LocalSettings uses getenv)."""
+    env = os.environ.copy()
+    env["MW_SERVER"] = MW_SERVER or SITE_PUBLIC_URL
+    env["SPRITE_PUBLIC_URL"] = SPRITE_PUBLIC_URL
+    # Ensure PHP cwd-related tools see project .env values consistently
+    env["SITE_PUBLIC_URL"] = SITE_PUBLIC_URL
+    return env
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -50,6 +62,8 @@ def main(argv: list[str] | None = None) -> int:
     if hasattr(signal, "SIGTERM"):
         signal.signal(signal.SIGTERM, shutdown)
 
+    env = _child_env()
+
     wiki_cmd = [
         PHP_BIN,
         "-S",
@@ -67,14 +81,36 @@ def main(argv: list[str] | None = None) -> int:
         str(SPRITE_PORT),
     ]
 
-    public = SITE_PUBLIC_URL.rstrip("/") or f"http://127.0.0.1:{WIKI_PORT}"
+    public = (MW_SERVER or SITE_PUBLIC_URL).rstrip("/") or f"http://127.0.0.1:{WIKI_PORT}"
+    if WIKI_HOST in ("127.0.0.1", "localhost"):
+        print(
+            "WARNING: WIKI_HOST is localhost — not reachable from the internet.\n"
+            "         Use WIKI_HOST=0.0.0.0 and SITE_PUBLIC_URL=http://YOUR_IP:3000\n"
+        )
+    if "0.0.0.0" in public:
+        print(
+            "WARNING: SITE_PUBLIC_URL/MW_SERVER contains 0.0.0.0 — browsers cannot open that.\n"
+            "         Set SITE_PUBLIC_URL=http://144.31.0.187:3000\n"
+        )
+
     print(f"Bind       {WIKI_HOST}:{WIKI_PORT} (php) + {SPRITE_HOST}:{SPRITE_PORT} (sprites)")
     print(f"Open       {public}/")
     print(f"Sprites    {SPRITE_PUBLIC_URL}/sprite/…")
     print("Ctrl+C to stop.\n")
 
-    procs.append(subprocess.Popen(wiki_cmd, cwd=str(BASE_DIR)))
-    procs.append(subprocess.Popen(sprite_cmd, cwd=str(BASE_DIR)))
+    procs.append(subprocess.Popen(wiki_cmd, cwd=str(BASE_DIR), env=env))
+    procs.append(subprocess.Popen(sprite_cmd, cwd=str(BASE_DIR), env=env))
+
+    # Quick local probe
+    time.sleep(0.8)
+    try:
+        import urllib.request
+
+        code = urllib.request.urlopen(f"http://127.0.0.1:{WIKI_PORT}/", timeout=3).status
+        print(f"Local probe http://127.0.0.1:{WIKI_PORT}/ → HTTP {code}")
+    except Exception as e:  # noqa: BLE001
+        print(f"Local probe failed: {e}")
+        print("If this fails, MediaWiki/PHP is not serving — check logs above.")
 
     try:
         while True:

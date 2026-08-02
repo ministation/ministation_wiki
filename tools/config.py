@@ -34,10 +34,13 @@ WIKI_HOST = os.getenv("WIKI_HOST", os.getenv("HOST", "127.0.0.1"))
 WIKI_PORT = int(os.getenv("WIKI_PORT", os.getenv("PORT", "3000")))
 SPRITE_HOST = os.getenv("SPRITE_HOST", "127.0.0.1")
 SPRITE_PORT = int(os.getenv("SPRITE_PORT", "3001"))
-SPRITE_PUBLIC_URL = os.getenv(
-    "SPRITE_PUBLIC_URL",
-    f"http://{SPRITE_HOST}:{SPRITE_PORT}",
-).rstrip("/")
+_sprite_public_default = (
+    f"http://127.0.0.1:{SPRITE_PORT}"
+    if SPRITE_HOST in ("0.0.0.0", "::", "")
+    else f"http://{SPRITE_HOST}:{SPRITE_PORT}"
+)
+SPRITE_PUBLIC_URL = os.getenv("SPRITE_PUBLIC_URL", _sprite_public_default).rstrip("/")
+MW_SERVER = os.getenv("MW_SERVER", SITE_PUBLIC_URL).rstrip("/")
 
 PHP_BIN = os.getenv("PHP_BIN", "php")
 CONTENT_DIR = Path(os.getenv("CONTENT_DIR", str(BASE_DIR / "content" / "ru")))
