@@ -10,8 +10,10 @@ from tools.config import (
     BASE_DIR,
     MW_DIR,
     PHP_BIN,
+    SITE_PUBLIC_URL,
     SPRITE_HOST,
     SPRITE_PORT,
+    SPRITE_PUBLIC_URL,
     WIKI_HOST,
     WIKI_PORT,
 )
@@ -65,8 +67,10 @@ def main(argv: list[str] | None = None) -> int:
         str(SPRITE_PORT),
     ]
 
-    print(f"MediaWiki  http://{WIKI_HOST}:{WIKI_PORT}/")
-    print(f"Sprites    http://{SPRITE_HOST}:{SPRITE_PORT}/sprite/…")
+    public = SITE_PUBLIC_URL.rstrip("/") or f"http://127.0.0.1:{WIKI_PORT}"
+    print(f"Bind       {WIKI_HOST}:{WIKI_PORT} (php) + {SPRITE_HOST}:{SPRITE_PORT} (sprites)")
+    print(f"Open       {public}/")
+    print(f"Sprites    {SPRITE_PUBLIC_URL}/sprite/…")
     print("Ctrl+C to stop.\n")
 
     procs.append(subprocess.Popen(wiki_cmd, cwd=str(BASE_DIR)))

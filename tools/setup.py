@@ -458,18 +458,26 @@ CUSTOM_MARKER = "# BEGIN ministation_custom"
 def write_custom_settings_snippet() -> None:
     """Ensure LocalSettings.php requires our custom overrides."""
     CUSTOM_SETTINGS.parent.mkdir(parents=True, exist_ok=True)
-    from tools.config import MAIN_SITE_URL, WIKI_HOST, WIKI_PORT
+    from tools.config import MAIN_SITE_URL
 
-    local_server = f"http://{WIKI_HOST}:{WIKI_PORT}"
+    # Never put WIKI_HOST (e.g. 0.0.0.0) into $wgServer — browsers cannot use it.
     custom = f"""<?php
 # Auto-generated / managed by `python -m tools setup`. Safe to edit values.
 # Loaded from mediawiki/LocalSettings.php
 
 $wgSitename = {SITE_NAME!r};
 $wgLanguageCode = {MW_LANG!r};
+
+# Public URL of the wiki (not the bind address). Override with env MW_SERVER.
 $wgServer = getenv('MW_SERVER') ?: {SITE_PUBLIC_URL!r};
-if (PHP_SAPI === 'cli-server' || (isset($_SERVER['HTTP_HOST']) && str_contains($_SERVER['HTTP_HOST'], '127.0.0.1'))) {{
-    $wgServer = getenv('MW_SERVER') ?: {local_server!r};
+# When opened via php -S, prefer the Host the browser actually used.
+if ( PHP_SAPI === 'cli-server' && !empty( $_SERVER['HTTP_HOST'] ) ) {{
+	$scheme = ( !empty( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] !== 'off' ) ? 'https' : 'http';
+	$host = $_SERVER['HTTP_HOST'];
+	// Reject bind-all hosts that break redirects/links
+	if ( !str_starts_with( $host, '0.0.0.0' ) ) {{
+		$wgServer = $scheme . '://' . $host;
+	}}
 }}
 
 $wgScriptPath = {MW_SCRIPT_PATH!r};
