@@ -14,11 +14,12 @@
 		</form>
 		{{/data-search-box}}
 		<div class="topbar-actions">
-			<button type="button" class="icon-btn" id="themeToggle" title="Тема" aria-label="Сменить тему">◐</button>
+			<button type="button" class="icon-btn theme-toggle" id="themeToggle" title="Тема" aria-label="Сменить тему">◐</button>
 			<a class="btn btn-site" href="https://ministation.ru" target="_blank" rel="noopener">Сайт</a>
 			{{#data-portlets}}
-				{{#data-user-menu}}{{>PortletInline}}{{/data-user-menu}}
-				{{#data-actions}}{{>PortletInline}}{{/data-actions}}
+				{{#data-user-menu}}
+				<nav class="user-cluster" aria-label="Учётная запись">{{>PortletInline}}</nav>
+				{{/data-user-menu}}
 			{{/data-portlets}}
 		</div>
 	</div>
@@ -31,21 +32,21 @@
 			{{#data-portlets-sidebar.data-portlets-first}}{{>Portlet}}{{/data-portlets-sidebar.data-portlets-first}}
 			{{#data-portlets-sidebar.array-portlets-rest}}{{>Portlet}}{{/data-portlets-sidebar.array-portlets-rest}}
 		</div>
-		<div class="side-group">
-			<div class="side-title">Страница</div>
-			{{#data-portlets}}
-				{{#data-views}}{{>Portlet}}{{/data-views}}
-				{{#data-associated-pages}}{{>Portlet}}{{/data-associated-pages}}
-			{{/data-portlets}}
-		</div>
 		<div class="side-note">
-			Спрайты SS14: <code>&#123;&#123;#sprite:Path.rsi/state|scale=3&#125;&#125;</code>
+			Спрайты: <code>&#123;&#123;#sprite:Path.rsi/state|scale=3&#125;&#125;</code>
 		</div>
 	</aside>
 
 	<main class="content" id="content" role="main">
 		<article class="wiki-page mw-body">
 			<header class="page-head">
+				<div class="page-toolbar">
+					{{#data-portlets}}
+						{{#data-views}}{{>PortletInline}}{{/data-views}}
+						{{#data-associated-pages}}{{>PortletInline}}{{/data-associated-pages}}
+						{{#data-actions}}{{>PortletInline}}{{/data-actions}}
+					{{/data-portlets}}
+				</div>
 				{{#array-indicators}}
 				<div class="mw-indicators">{{{html}}}</div>
 				{{/array-indicators}}
@@ -62,7 +63,7 @@
 </div>
 
 <footer class="footer">
-	<p>Вики <strong>Мини-станции</strong> · интерфейс как на <a href="https://ministation.ru">ministation.ru</a></p>
+	<p>Вики <strong>Мини-станции</strong> · как на <a href="https://ministation.ru">ministation.ru</a></p>
 	{{#data-footer}}
 		{{#data-places}}{{>FooterList}}{{/data-places}}
 		{{#data-icons}}{{>FooterList}}{{/data-icons}}
