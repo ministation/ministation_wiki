@@ -34,7 +34,20 @@ from tools.config import (
 )
 from tools.db import ensure_database
 
-REQUIRED_PHP_EXTS = ("pdo_pgsql", "pgsql", "intl", "mbstring", "xml", "curl", "json")
+REQUIRED_PHP_EXTS = (
+    "ctype",
+    "curl",
+    "dom",
+    "fileinfo",
+    "intl",
+    "json",
+    "mbstring",
+    "openssl",
+    "pdo_pgsql",
+    "pgsql",
+    "xml",
+)
+MIN_PHP = (8, 5, 0)
 
 
 def _run(cmd: list[str], *, cwd: Path | None = None, check: bool = True) -> subprocess.CompletedProcess:
@@ -42,18 +55,42 @@ def _run(cmd: list[str], *, cwd: Path | None = None, check: bool = True) -> subp
     return subprocess.run(cmd, cwd=cwd, check=check)
 
 
+def _php_version_tuple() -> tuple[int, int, int]:
+    raw = subprocess.check_output(
+        [PHP_BIN, "-r", "echo PHP_MAJOR_VERSION,'.',PHP_MINOR_VERSION,'.',PHP_RELEASE_VERSION;"],
+        text=True,
+    ).strip()
+    parts = [int(x) for x in raw.split(".")[:3]]
+    while len(parts) < 3:
+        parts.append(0)
+    return parts[0], parts[1], parts[2]
+
+
 def check_php() -> None:
     try:
         ver = subprocess.check_output([PHP_BIN, "-v"], text=True, stderr=subprocess.STDOUT)
     except (FileNotFoundError, subprocess.CalledProcessError) as e:
         raise SystemExit(
-            f"PHP not found ({PHP_BIN}). Install PHP 8.1+ with pdo_pgsql/intl/mbstring/xml.\n{e}"
+            f"PHP not found ({PHP_BIN}). Install PHP 8.5+ "
+            f"(Windows: winget install PHP.PHP.8.5) with pdo_pgsql/intl/mbstring/xml/openssl.\n{e}"
         ) from e
     print(ver.splitlines()[0])
+    try:
+        current = _php_version_tuple()
+    except (subprocess.CalledProcessError, ValueError) as e:
+        raise SystemExit(f"Could not parse PHP version: {e}") from e
+    if current < MIN_PHP:
+        raise SystemExit(
+            f"PHP {'.'.join(map(str, current))} is too old. "
+            f"Need PHP {'.'.join(map(str, MIN_PHP))}+ (latest stable 8.5.x recommended)."
+        )
     mods = subprocess.check_output([PHP_BIN, "-m"], text=True).lower().splitlines()
     missing = [m for m in REQUIRED_PHP_EXTS if m not in mods]
     if missing:
-        raise SystemExit(f"Missing PHP extensions: {', '.join(missing)}")
+        raise SystemExit(
+            f"Missing PHP extensions: {', '.join(missing)}\n"
+            f"Enable them in php.ini next to php.exe (extension=…)."
+        )
 
 
 def download_mediawiki() -> None:
