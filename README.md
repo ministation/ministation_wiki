@@ -8,12 +8,19 @@ MediaWiki + PostgreSQL для сервера **Мини-станция** (SS14).
 - Скин **MiniStation** — Exo 2 / Press Start 2P, янтарный акцент, light/dark
 - Оркестрация — Python **venv** (`python -m tools …`), без Docker
 
-> MediaWiki — PHP. Venv ставит зависимости Python и запускает CLI; на хосте нужны **PHP 8.5+** (последняя стабильная ветка; `pdo_pgsql`, `pgsql`, `intl`, `mbstring`, `xml`, `curl`, `openssl`) и **PostgreSQL**.
+> MediaWiki — PHP. Venv ставит зависимости Python и запускает CLI; на хосте нужны **PHP 8.4+** (`pdo_pgsql`, `pgsql`, `intl`, `mbstring`, `xml`, `curl`, `openssl`) и **PostgreSQL**.
+
+Ubuntu (Questing и др.):
+
+```bash
+sudo apt install -y php8.4-cli php8.4-pgsql php8.4-intl php8.4-mbstring \
+  php8.4-xml php8.4-curl php8.4-gd php8.4-opcache
+```
 
 Windows:
 
 ```bash
-winget install PHP.PHP.8.5
+winget install PHP.PHP.8.4
 # затем включите extension=pdo_pgsql, pgsql, intl, … в php.ini рядом с php.exe
 ```
 

@@ -47,7 +47,7 @@ REQUIRED_PHP_EXTS = (
     "pgsql",
     "xml",
 )
-MIN_PHP = (8, 5, 0)
+MIN_PHP = (8, 4, 0)
 
 
 def _run(cmd: list[str], *, cwd: Path | None = None, check: bool = True) -> subprocess.CompletedProcess:
@@ -71,8 +71,9 @@ def check_php() -> None:
         ver = subprocess.check_output([PHP_BIN, "-v"], text=True, stderr=subprocess.STDOUT)
     except (FileNotFoundError, subprocess.CalledProcessError) as e:
         raise SystemExit(
-            f"PHP not found ({PHP_BIN}). Install PHP 8.5+ "
-            f"(Windows: winget install PHP.PHP.8.5) with pdo_pgsql/intl/mbstring/xml/openssl.\n{e}"
+            f"PHP not found ({PHP_BIN}). Install PHP 8.4+ "
+            f"(Ubuntu: php8.4-cli + php8.4-pgsql/intl/…; Windows: winget install PHP.PHP.8.4) "
+            f"with pdo_pgsql/intl/mbstring/xml/openssl.\n{e}"
         ) from e
     print(ver.splitlines()[0])
     try:
@@ -82,7 +83,7 @@ def check_php() -> None:
     if current < MIN_PHP:
         raise SystemExit(
             f"PHP {'.'.join(map(str, current))} is too old. "
-            f"Need PHP {'.'.join(map(str, MIN_PHP))}+ (latest stable 8.5.x recommended)."
+            f"Need PHP {'.'.join(map(str, MIN_PHP))}+ (8.4.x on Ubuntu Questing is fine)."
         )
     mods = subprocess.check_output([PHP_BIN, "-m"], text=True).lower().splitlines()
     missing = [m for m in REQUIRED_PHP_EXTS if m not in mods]
