@@ -360,10 +360,23 @@ def cmd_apply(source_filter: str | None = None) -> None:
     if not root.is_dir():
         raise SystemExit("No imports yet. Run: python -m tools import_remote seed")
     files = sorted(root.rglob("*.wiki"))
+    available = sorted({p.parent.name for p in files})
     if source_filter:
         files = [f for f in files if f.parent.name == source_filter]
     if not files:
-        raise SystemExit("No .wiki files to apply")
+        hint = (
+            f" Available folders with .wiki: {', '.join(available)}."
+            if available
+            else " content/import/**/*.wiki are gitignored — download first:"
+            "\n  export REMOTE_WIKI_API='https://…/api.php'"
+            "\n  python3 -m tools import_remote dump remote"
+            "\n  python3 -m tools import_remote apply --source remote"
+        )
+        raise SystemExit(
+            f"No .wiki files to apply"
+            + (f" for --source {source_filter}." if source_filter else ".")
+            + hint
+        )
     n = 0
     skipped = 0
     for path in files:
