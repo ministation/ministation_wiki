@@ -26,8 +26,12 @@ html[data-theme="light"] {
   --shadow-btn: 0 3px 0 rgba(23, 34, 47, 0.14);
   --shadow-btn-color: 0 3px 0 rgba(0, 0, 0, 0.25);
   --grad-accent: linear-gradient(135deg, #f5c518 0%, #f59e0b 48%, #ea580c 100%);
+  --grad-hero-card: linear-gradient(135deg, #fde047 0%, #f59e0b 42%, #ea580c 100%);
   --grad-hero: radial-gradient(ellipse 80% 50% at 10% -10%, rgba(240, 120, 10, 0.12), transparent 55%),
     radial-gradient(ellipse 60% 40% at 90% 0%, rgba(61, 110, 168, 0.10), transparent 50%);
+  --shadow-lift: 0 6px 0 rgba(23, 34, 47, 0.08), 0 14px 28px rgba(23, 34, 47, 0.10);
+  --success: #1f9a55;
+  --danger: #d9453a;
   --grid-line: rgba(23, 34, 47, 0.03);
   --checker-bg: #dfe7f2;
   --checker: #c9d4e4;
@@ -52,6 +56,7 @@ html[data-theme="dark"] {
   --topbar-bg: rgba(14, 20, 40, 0.92);
   --shadow-hard: 0 4px 0 rgba(0, 0, 0, 0.35), 0 12px 28px rgba(0, 0, 0, 0.35);
   --shadow-btn: 0 3px 0 rgba(0, 0, 0, 0.4);
+  --grad-hero-card: linear-gradient(135deg, #78350f 0%, #d97706 42%, #ea580c 100%);
   --grad-hero: radial-gradient(ellipse 80% 50% at 10% -10%, rgba(240, 120, 10, 0.18), transparent 55%),
     radial-gradient(ellipse 60% 40% at 90% 0%, rgba(61, 110, 168, 0.14), transparent 50%);
   --grid-line: rgba(255, 255, 255, 0.03);
@@ -494,10 +499,14 @@ body {
   padding: 10px 12px;
   line-height: 1.45;
 }
-.side-note code {
+.side-note a {
+  color: var(--link);
+  font-weight: 700;
+  text-decoration: none;
+}
+.side-note a:hover {
   color: var(--accent);
-  font-size: 0.72rem;
-  word-break: break-all;
+  text-decoration: underline;
 }
 
 .content { flex: 1; min-width: 0; max-width: 100%; overflow-x: hidden; }
@@ -768,6 +777,173 @@ body {
   gap: 12px;
   justify-content: center;
   padding: 0;
+}
+
+/* === Home hero (1:1 ministation.ru) === */
+.ms-hero.card,
+.wiki-page .hero-card {
+  background: var(--grad-hero-card);
+  border: 2px solid var(--accent-deep);
+  border-radius: var(--radius);
+  color: #fff;
+  text-align: center;
+  padding: 28px 22px 30px;
+  position: relative;
+  overflow: hidden;
+  margin: 0 0 18px;
+  box-shadow: var(--shadow-lift);
+}
+
+.wiki-page .hero-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(1.5px 1.5px at 16% 30%, rgba(255, 255, 255, 0.85), transparent 100%),
+    radial-gradient(1px 1px at 34% 72%, rgba(255, 255, 255, 0.6), transparent 100%),
+    radial-gradient(1.5px 1.5px at 55% 20%, rgba(255, 255, 255, 0.7), transparent 100%),
+    radial-gradient(1px 1px at 72% 62%, rgba(255, 255, 255, 0.6), transparent 100%),
+    radial-gradient(1.5px 1.5px at 88% 34%, rgba(255, 255, 255, 0.8), transparent 100%);
+  opacity: 0.9;
+}
+
+.wiki-page .hero-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, transparent 42%);
+  opacity: 0.7;
+}
+
+.wiki-page .hero-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.wiki-page .hero-card .hero-brand,
+.wiki-page h2.hero-brand {
+  font-family: var(--font-pixel) !important;
+  font-size: clamp(0.95rem, 2.8vw, 1.35rem) !important;
+  font-weight: 400 !important;
+  color: #fff !important;
+  margin: 0 0 14px !important;
+  padding: 0 !important;
+  border: none !important;
+  text-transform: none !important;
+  letter-spacing: 0.04em;
+  line-height: 1.35 !important;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.18);
+  text-align: center;
+}
+
+.wiki-page .hero-card .hero-brand span {
+  color: #fff7d6;
+}
+
+.wiki-page .hero-card .tagline {
+  display: inline-block;
+  font-family: var(--font-pixel);
+  font-size: 0.58rem;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+}
+
+.wiki-page .hero-card .description {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.95);
+  max-width: 680px;
+  margin: 0 auto 18px;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+  font-weight: 400;
+}
+
+.wiki-page .hero-card .description a {
+  color: #fff !important;
+  text-decoration: underline;
+}
+
+.wiki-page .social-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.wiki-page .social-links a,
+.wiki-page .social-links a.link-btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 118px;
+  min-height: 42px;
+  padding: 10px 16px !important;
+  font-family: var(--font-pixel) !important;
+  font-size: 0.58rem !important;
+  font-weight: 400 !important;
+  color: #fff !important;
+  text-decoration: none !important;
+  border-radius: var(--radius-sm);
+  border: 2px solid rgba(0, 0, 0, 0.25) !important;
+  box-shadow: var(--shadow-btn-color) !important;
+  background: var(--danger);
+  transition: filter var(--transition), transform var(--transition), box-shadow var(--transition);
+}
+
+.wiki-page .social-links a:hover {
+  filter: brightness(1.12);
+  color: #fff !important;
+  transform: translateY(-1px);
+  text-decoration: none !important;
+}
+
+.wiki-page .social-links a:active {
+  transform: translateY(2px);
+  box-shadow: none !important;
+}
+
+.wiki-page .social-links a i {
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.wiki-page .social-links a.website { background: var(--danger) !important; }
+.wiki-page .social-links a.discord { background: var(--discord) !important; }
+.wiki-page .social-links a.telegram { background: #2a9fd8 !important; }
+.wiki-page .social-links a.wiki { background: var(--success) !important; }
+.wiki-page .social-links a.boosty { background: #ef6537 !important; }
+.wiki-page .social-links a.github { background: #3d434d !important; }
+
+/* Hide default MW title on home — hero brand is enough */
+.page-Main_Page .page-head .firstHeading,
+.page-Main_Page #firstHeading,
+.page-Заглавная_страница .page-head .firstHeading,
+.page-Заглавная_страница #firstHeading {
+  display: none;
+}
+
+.page-Main_Page .page-toolbar,
+.page-Заглавная_страница .page-toolbar {
+  margin-bottom: 10px;
+}
+
+@media (max-width: 560px) {
+  .wiki-page .social-links a {
+    min-width: calc(50% - 6px);
+  }
 }
 
 /* MW chrome cleanup */

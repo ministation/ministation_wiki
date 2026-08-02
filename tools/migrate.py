@@ -35,6 +35,22 @@ INFOBOX_TEMPLATE = """<div class="wiki-infobox">
 </div>
 """
 
+# 1:1 with ministation.ru home hero; Wiki button → Сайт
+MS_HERO_TEMPLATE = """<div class="card hero-card hero-top ms-hero">
+<h2 class="hero-brand">Мини<span>-</span>станция</h2>
+<span class="tagline">Космическая станция 14</span>
+<p class="description">Мини-станция - это некоммерческий, самый безбашенный проект в игре Космическая станция 14, где ты сможешь как вдоволь поучаствовать в эпичных баталиях, так и показать свой ролевой отыгрыш.</p>
+<div class="social-links">
+<a href="http://cdn.ministation.ru/" target="_blank" rel="noopener" class="link-btn website"><i class="fa-solid fa-cloud"></i> CDN</a>
+<a href="https://discord.gg/mini-station" target="_blank" rel="noopener" class="link-btn discord"><i class="fa-brands fa-discord"></i> Discord</a>
+<a href="https://t.me/mini_station" target="_blank" rel="noopener" class="link-btn telegram"><i class="fa-brands fa-telegram"></i> Telegram</a>
+<a href="https://ministation.ru" target="_blank" rel="noopener" class="link-btn wiki"><i class="fa-solid fa-globe"></i> Сайт</a>
+<a href="https://ministation.ru/donate" target="_blank" rel="noopener" class="link-btn boosty"><i class="fa-solid fa-heart"></i> Донат</a>
+<a href="https://github.com/ministation/mini-station-goob" target="_blank" rel="noopener" class="link-btn github"><i class="fa-brands fa-github"></i> GitHub</a>
+</div>
+</div>
+"""
+
 
 def parse_frontmatter(text: str) -> tuple[dict, str]:
     m = FRONTMATTER_RE.match(text)
@@ -287,6 +303,7 @@ def edit_page(title: str, text: str, summary: str = "import from content/ru") ->
 
 def ensure_infobox_template() -> None:
     edit_page("Template:Infobox", INFOBOX_TEMPLATE, summary="ensure Infobox template")
+    edit_page("Template:MsHero", MS_HERO_TEMPLATE, summary="ensure MiniStation home hero")
 
 
 def migrate() -> None:

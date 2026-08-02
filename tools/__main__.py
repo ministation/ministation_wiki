@@ -14,6 +14,7 @@ def main(argv: list[str] | None = None) -> int:
             "  extensions  Clone+enable official bundled extensions/skins for this MW version\n"
             "  sprites     Sparse-clone SS14 Resources/Textures from git for {{#sprite:}}\n"
             "  migrate     Import content/ru Markdown into MediaWiki\n"
+            "  import_remote  Fetch pages from Corvax/МК wikis into content/import\n"
             "  start       Run MediaWiki (php -S) + sprite service (uvicorn)\n"
         )
         return 0
@@ -39,6 +40,10 @@ def main(argv: list[str] | None = None) -> int:
         from tools.migrate import main as migrate_main
 
         return migrate_main(rest)
+    if cmd in ("import_remote", "import"):
+        from tools.import_remote import main as import_main
+
+        return import_main(rest)
     if cmd == "start":
         from tools.start import main as start_main
 

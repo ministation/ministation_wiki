@@ -55,7 +55,36 @@ python -m tools start     # MediaWiki :3000 + sprites :3001
 | `python -m tools sprites` | Sparse-clone `Resources/Textures` из git для `{{#sprite:}}` |
 | `python -m tools db` | только PostgreSQL |
 | `python -m tools migrate` | Markdown → wikitext → страницы MW |
+| `python -m tools import_remote seed` | Скачать сиды с Corvax + МК → `content/import/` |
+| `python -m tools import_remote apply` | Залить импорт в локальную MediaWiki |
 | `python -m tools start` | `php -S` + uvicorn спрайтов |
+
+## Наполнение контентом
+
+```bash
+python -m tools import_remote seed
+python -m tools import_remote fetch corvax --category Руководства --limit 40
+python -m tools import_remote fetch mk --titles "Руководство для новичков" Медицина
+python -m tools import_remote apply
+```
+
+Страницы попадают в вики как обычный контент Мини-станции (без пометок источника).
+
+## Релиз на VPS (чеклист)
+
+```bash
+git pull
+source .venv/bin/activate
+python -m tools setup          # если ещё не ставили / обновить LocalSettings.custom
+# VisualEditor без submodule не грузить (tools start санитизирует)
+python -m tools sprites
+python -m tools migrate
+python -m tools import_remote seed
+python -m tools import_remote apply
+python -m tools start
+```
+
+Перед продом: в `config/LocalSettings.custom.php` выключить `$wgShowExceptionDetails`.
 
 ## Спрайты
 

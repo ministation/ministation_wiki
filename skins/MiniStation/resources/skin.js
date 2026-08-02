@@ -5,6 +5,12 @@
     "https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700&family=Press+Start+2P&display=swap";
   document.head.appendChild(font);
 
+  var fa = document.createElement("link");
+  fa.rel = "stylesheet";
+  fa.href =
+    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css";
+  document.head.appendChild(fa);
+
   var key = "ms-wiki-theme";
   var root = document.documentElement;
 

@@ -613,7 +613,7 @@ $wgHooks['BeforePageDisplay'][] = static function ( $out, $skin ): void {{
 		return;
 	}}
 	global $wgScriptPath;
-	$href = rtrim( (string)$wgScriptPath, '/' ) . '/skins/MiniStation/resources/skin.css?v=20260802c';
+	$href = rtrim( (string)$wgScriptPath, '/' ) . '/skins/MiniStation/resources/skin.css?v=20260802e';
 	$out->addStyle( $href, 'screen' );
 }};
 

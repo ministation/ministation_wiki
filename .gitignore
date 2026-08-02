@@ -11,3 +11,5 @@ data/ss14_repo/
 .vscode/
 mediawiki/
 config/LocalSettings.custom.php
+config/LocalSettings.bundled.php
+content/import/**/*.wiki
