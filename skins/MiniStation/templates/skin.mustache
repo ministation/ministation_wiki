@@ -1,10 +1,15 @@
-{{! MiniStation skin — layout matched to ministation.ru }}
+{{! MiniStation skin — page chrome closer to TGUI }}
 <div class="bg-grid" aria-hidden="true"></div>
 <header class="topbar">
 	<div class="topbar-inner">
 		<a class="logo" href="{{link-mainpage}}">
-			<span class="logo-mark" aria-hidden="true"></span>
-			<span class="logo-text">Мини<span>-</span>вики</span>
+			{{#data-logos}}
+			<img class="logo-img" src="{{icon}}" width="42" height="42" alt="Мини-станция" decoding="async">
+			{{/data-logos}}
+			{{^data-logos}}
+			<img class="logo-img" src="/skins/MiniStation/resources/logo.png" width="42" height="42" alt="Мини-станция" decoding="async">
+			{{/data-logos}}
+			<h1 class="logo-text">Мини<span>-</span>вики</h1>
 		</a>
 		{{#data-search-box}}
 		<form class="search" action="{{form-action}}" method="get" role="search">
@@ -14,12 +19,12 @@
 		</form>
 		{{/data-search-box}}
 		<div class="topbar-actions">
-			<button type="button" class="icon-btn theme-toggle" id="themeToggle" title="Тема" aria-label="Сменить тему">◐</button>
-			<a class="btn btn-site" href="https://ministation.ru" target="_blank" rel="noopener">Сайт</a>
+			<button type="button" class="icon-btn theme-toggle tgui-btn tgui-btn--quiet" id="themeToggle" title="Тема" aria-label="Сменить тему">◐</button>
+			<a class="btn btn-site tgui-btn" href="https://ministation.ru" target="_blank" rel="noopener">Сайт</a>
 			{{#data-portlets}}
 				{{#data-user-menu}}
 				<nav class="user-cluster" aria-label="Учётная запись">{{>PortletInline}}</nav>
-				{{/data-user-menu}}
+				{{/data-portlets}}
 			{{/data-portlets}}
 		</div>
 	</div>
@@ -39,12 +44,18 @@
 	<main class="content" id="content" role="main">
 		<article class="wiki-page mw-body">
 			<header class="page-head">
-				<div class="page-toolbar">
-					{{#data-portlets}}
-						{{#data-views}}{{>PortletInline}}{{/data-views}}
-						{{#data-associated-pages}}{{>PortletInline}}{{/data-associated-pages}}
-						{{#data-actions}}{{>PortletInline}}{{/data-actions}}
-					{{/data-portlets}}
+				<div class="page-actions" role="navigation" aria-label="Действия со страницей">
+					<div class="page-actions__left">
+						{{#data-portlets}}
+							{{#data-associated-pages}}{{>PortletInline}}{{/data-associated-pages}}
+						{{/data-portlets}}
+					</div>
+					<div class="page-actions__right">
+						{{#data-portlets}}
+							{{#data-views}}{{>PortletInline}}{{/data-views}}
+							{{#data-actions}}{{>PortletInline}}{{/data-actions}}
+						{{/data-portlets}}
+					</div>
 				</div>
 				{{#array-indicators}}
 				<div class="mw-indicators">{{{html}}}</div>

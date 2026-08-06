@@ -169,9 +169,11 @@ def adapt_wikitext(text: str, source_key: str, title: str) -> str:
         flags=re.IGNORECASE,
     )
     text = re.sub(r"\n*\[\[Category:Импорт(?:/[^\]]+)?\]\]\s*", "\n", text)
-    # TemplateStyles CSS is bundled in mainpage-widgets.css
-    text = re.sub(r"<templatestyles\s+src=\"[^\"]+\"\s*/>\s*", "", text)
-    text = re.sub(r"\{\{#seo:[\s\S]*?\}\}\s*", "", text)
+    # TemplateStyles subpages are flaky on this install — CSS is bundled in skin.
+    text = re.sub(r"<templatestyles\s+src=\"[^\"]+\"\s*/>\s*", "", text, flags=re.I)
+    # Keep SEO template body; strip #seo invocations from ordinary pages only
+    if title not in {"Шаблон:SEO", "Template:SEO"}:
+        text = re.sub(r"\{\{#seo:[\s\S]*?\}\}\s*", "", text)
 
     # Scrub foreign Discord invites that often appear in mirrored splash templates
     text = re.sub(
@@ -210,6 +212,55 @@ def adapt_wikitext(text: str, source_key: str, title: str) -> str:
             text,
         )
         text = text.replace('class="paradise-info-string>', 'class="paradise-info-string">')
+
+    # Scrub third-party branding from mirrored pages (keep mechanics, drop names)
+    replacements = [
+        (r"\bSS220 Paradise\b", "Мини-станция"),
+        (r"\bSS\s*220\b", "Мини-станция"),
+        (r"\bSS220\b", "Мини-станция"),
+        (r"\bss220\b", "ministation"),
+        (r"\bСС\s*220\b", "Мини-станция"),
+        (r"\bСС220\b", "Мини-станция"),
+        (r"\bсс220\b", "ministation"),
+        (r"\bParadise Station\b", "Мини-станция"),
+        (r"\bParadiseSS13\b", "Мини-станция"),
+        (r"\bParadise\b", "Мини-станция"),
+        (r"\bпарадайз(?:а|е|у|ом)?\b", "Мини-станция"),
+        (r"\bПарадайз(?:а|е|у|ом)?\b", "Мини-станция"),
+        (r"\bCorvax\b", "Мини-станция"),
+        (r"\bКорвакс\b", "Мини-станция"),
+        (r"\bMetaCorp\b", "Мини-станция"),
+        (r"\bMetacorp\b", "Мини-станция"),
+        (r"\bMK\b(?=\s*(?:wiki|вики|сервер))", "Мини-станция"),
+    ]
+    for pat, rep in replacements:
+        text = re.sub(pat, rep, text, flags=re.IGNORECASE)
+
+    text = re.sub(
+        r"https?://(?:wiki\.|wiki14\.)?ss220\.(?:club|space|ru)[^\s\]|<]*",
+        "https://wiki.ministation.ru",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(
+        r"byond://s\d+\.ss220\.club:\d+",
+        "ss14.ministation.ru",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(
+        r"https?://(?:www\.)?boosty\.to/ss220[^\s\]|<]*",
+        "https://ministation.ru/donate",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(
+        r"https?://github\.com/ss220(?:club|-space)/[A-Za-z0-9_.-]+",
+        "https://github.com/ministation/mini-station-goob",
+        text,
+        flags=re.IGNORECASE,
+    )
+
     return text.rstrip() + "\n"
 
 
@@ -389,11 +440,40 @@ def cmd_apply(source_filter: str | None = None) -> None:
             skipped += 1
             continue
         if title.endswith("/styles.css"):
-            skipped += 1
+            edit_page_css(title, body, summary="import TemplateStyles CSS")
+            n += 1
             continue
         edit_page(title, body, summary="обновление контента вики Мини-станции")
         n += 1
     print(f"Applied {n} page(s) into MediaWiki" + (f" (skipped {skipped})" if skipped else "") + ".")
+
+
+def edit_page_css(title: str, text: str, summary: str = "import TemplateStyles CSS") -> None:
+    """Create/update a sanitized-css TemplateStyles page."""
+    import subprocess
+
+    from tools.config import MW_DIR, PHP_BIN
+
+    helper = MW_DIR / "maintenance" / "ministationSetSanitizedCss.php"
+    if helper.is_file():
+        proc = subprocess.run(
+            [PHP_BIN, "maintenance/run.php", "ministationSetSanitizedCss.php", title],
+            cwd=MW_DIR,
+            input=text,
+            text=True,
+            capture_output=True,
+        )
+        if proc.returncode == 0:
+            print(f"Import CSS: {title}")
+            print(f"  css-model ok: {title}")
+            return
+        print(proc.stdout)
+        print(proc.stderr)
+        print(f"  warn: sanitized-css failed for {title}, falling back to bundled skin CSS")
+        return
+
+    # No helper — skip (CSS mirrored in mainpage-widgets.css)
+    print(f"  skip css page (no helper): {title}")
 
 
 def cmd_images(source_key: str = "remote") -> None:

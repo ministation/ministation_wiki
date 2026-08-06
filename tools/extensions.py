@@ -225,6 +225,15 @@ def _composer_update() -> None:
             "  Or remove wfLoadExtension('AbuseFilter') from config/LocalSettings.bundled.php"
         )
 
+    oath_base32 = (
+        MW_DIR / "extensions" / "OATHAuth" / "vendor" / "christian-riesen" / "base32"
+    )
+    if (MW_DIR / "extensions" / "OATHAuth" / "extension.json").is_file() and not oath_base32.is_dir():
+        print(
+            "WARNING: christian-riesen/base32 missing. Special:AccountSecurity will 500.\n"
+            "  Fix: cd mediawiki/extensions/OATHAuth && composer update --no-dev"
+        )
+
 
 def write_bundled_loader(ext_names: list[str], skin_names: list[str]) -> Path:
     CUSTOM_SETTINGS.parent.mkdir(parents=True, exist_ok=True)

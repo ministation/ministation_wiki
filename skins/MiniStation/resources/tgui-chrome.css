@@ -1,0 +1,244 @@
+/* TGUI-like page actions (Читать / Просмотр кода / История) + solid buttons */
+
+:root {
+  --tgui-tab-underline: var(--color-primary, var(--accent, #3d6ea8));
+  --tgui-tab-height: 2em;
+  --tgui-btn-radius: var(--border-radius-small, 6px);
+  --tgui-transition: var(--transition-time, 0.15s);
+}
+
+/* Layout: left = статья/обсуждение, right = читать/код/история */
+.page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+  border-bottom: 1px solid var(--color-border, var(--border));
+}
+
+.page-actions__left,
+.page-actions__right {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0;
+}
+
+.page-actions .portlet-inline,
+.page-actions .tgui-menu,
+.page-actions .mw-portlet {
+  display: flex;
+  align-items: flex-end;
+}
+
+.page-actions .tgui-menu__heading,
+.page-actions .mw-portlet > .side-group-title,
+.page-actions .portlet-inline > h3,
+.page-actions .vector-menu-heading {
+  display: none !important;
+}
+
+.page-actions ul,
+.page-actions .tgui-menu__content-list,
+.page-actions .portlet-inline {
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 0;
+}
+
+.page-actions li,
+.page-actions .mw-list-item {
+  position: relative;
+  margin: 0;
+  list-style: none;
+  user-select: none;
+  color: var(--color-text-semi-translucent, var(--dim, #6b7a8d));
+  border-radius: var(--tgui-btn-radius) var(--tgui-btn-radius) 0 0;
+  transition: background-color var(--tgui-transition), color var(--tgui-transition);
+}
+
+.page-actions .mw-list-item::after {
+  content: "";
+  display: block;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  background-color: var(--tgui-tab-underline);
+  transform: scaleX(0);
+  transition: transform var(--tgui-transition);
+  z-index: 2;
+}
+
+.page-actions .mw-list-item:hover,
+.page-actions .mw-list-item:focus-within {
+  background-color: var(--color-bg-hover, rgba(23, 34, 47, 0.06));
+  color: var(--color-text, var(--ink));
+}
+
+.page-actions .mw-list-item:hover::after,
+.page-actions .mw-list-item:focus-within::after {
+  transform: scaleX(0.35);
+}
+
+.page-actions .mw-list-item.selected {
+  background-color: var(--color-bg-focus, rgba(61, 110, 168, 0.12));
+  color: var(--color-text, var(--ink));
+}
+
+.page-actions .mw-list-item.selected::after {
+  transform: scaleX(1);
+}
+
+.page-actions .mw-list-item > a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px; /* UX: touch target */
+  height: auto;
+  padding: 0.35em 0.85em;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: inherit !important;
+  text-decoration: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  transition: color var(--tgui-transition), background-color var(--tgui-transition);
+}
+
+.page-actions .mw-list-item > a:hover,
+.page-actions .mw-list-item > a:focus-visible {
+  color: inherit !important;
+  background: transparent !important;
+  outline: 2px solid var(--tgui-tab-underline);
+  outline-offset: -2px;
+}
+
+.page-actions .mw-list-item.new > a {
+  color: var(--color-hyperlink-new, #b84a4a) !important;
+}
+
+html[data-theme="dark"] .page-actions .mw-list-item:hover,
+html[data-theme="dark"] .page-actions .mw-list-item:focus-within {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="dark"] .page-actions .mw-list-item.selected {
+  background-color: rgba(79, 130, 192, 0.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-actions .mw-list-item,
+  .page-actions .mw-list-item::after,
+  .page-actions .mw-list-item > a,
+  .ms-btn {
+    transition: none !important;
+  }
+}
+
+/* Solid TGUI-like buttons (search, site, forms) */
+.ms-btn,
+.cdx-button,
+.mw-ui-button,
+button.cdx-button,
+input[type="submit"].cdx-button,
+#searchButton,
+.searchButton,
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35em;
+  min-height: 36px;
+  padding: 0.35em 0.85em;
+  border: none !important;
+  outline: none;
+  border-radius: var(--tgui-btn-radius) !important;
+  background: var(--color-primary, var(--accent, #3d6ea8)) !important;
+  color: var(--color-white, #fff) !important;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-decoration: none !important;
+  cursor: pointer;
+  box-shadow: none !important;
+  transition: background-color var(--tgui-transition), box-shadow var(--tgui-transition);
+}
+
+.ms-btn:hover,
+.cdx-button:hover,
+.mw-ui-button:hover,
+#searchButton:hover,
+.searchButton:hover,
+.btn:hover {
+  background: var(--color-primary-light, #4f82c0) !important;
+  color: #fff !important;
+}
+
+.ms-btn:active,
+.cdx-button:active,
+.mw-ui-button:active,
+#searchButton:active,
+.searchButton:active,
+.btn:active {
+  background: color-mix(in srgb, var(--color-primary, #3d6ea8) 80%, #000) !important;
+  box-shadow: inset 0 0 0.1em 0.1em rgba(0, 0, 0, 0.2) !important;
+  transition: none;
+}
+
+.ms-btn:focus-visible,
+.cdx-button:focus-visible,
+.mw-ui-button:focus-visible,
+#searchButton:focus-visible,
+.btn:focus-visible {
+  outline: 2px solid var(--color-primary-light, #4f82c0);
+  outline-offset: 2px;
+}
+
+/* Sidebar entries closer to TGUI menu chips */
+.side-menu .mw-list-item > a,
+.side-portlet .mw-list-item > a {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0.35em 0.55em;
+  border-radius: var(--tgui-btn-radius);
+  color: var(--color-text-semi-translucent, var(--dim)) !important;
+  text-decoration: none !important;
+  transition: background-color var(--tgui-transition), color var(--tgui-transition);
+}
+
+.side-menu .mw-list-item > a:hover,
+.side-portlet .mw-list-item > a:hover {
+  background: var(--color-bg-hover, rgba(23, 34, 47, 0.06));
+  color: var(--color-text, var(--ink)) !important;
+}
+
+.side-menu .mw-list-item.selected > a,
+.side-portlet .mw-list-item.selected > a {
+  background: var(--color-bg-focus, rgba(61, 110, 168, 0.12));
+  color: var(--color-text, var(--ink)) !important;
+}
+
+@media (max-width: 639px) {
+  .page-actions {
+    gap: 0.25rem;
+  }
+  .page-actions .mw-list-item > a {
+    min-height: 40px;
+    padding: 0.3em 0.65em;
+    font-size: 0.78rem;
+  }
+  .page-actions .mw-list-item {
+    border-radius: var(--tgui-btn-radius);
+  }
+}

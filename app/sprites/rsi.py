@@ -69,10 +69,36 @@ def resolve_rsi(target: str) -> tuple[Path, str]:
 
 def _load_meta(rsi_dir: Path) -> dict:
     meta_path = rsi_dir / "meta.json"
-    raw = meta_path.read_text(encoding="utf-8-sig")
-    # strip // comments sometimes present
+    raw = meta_path.read_text(encoding="utf-8-sig", errors="replace")
     raw = re.sub(r"//.*?$", "", raw, flags=re.M)
-    return json.loads(raw)
+    # Prefer strict JSON when possible
+    try:
+        return json.loads(raw, strict=False)
+    except json.JSONDecodeError:
+        pass
+
+    m = re.search(r'"size"\s*:\s*\{\s*"x"\s*:\s*(\d+)\s*,\s*"y"\s*:\s*(\d+)', raw)
+    if not m:
+        raise FileNotFoundError(f"cannot parse RSI meta size: {meta_path}")
+
+    states: list[dict] = []
+    for block in re.finditer(
+        r'\{\s*"name"\s*:\s*"([^"]+)"\s*(?:,\s*"directions"\s*:\s*(\d+))?',
+        raw,
+    ):
+        states.append(
+            {
+                "name": block.group(1),
+                "directions": int(block.group(2) or 1),
+            }
+        )
+    if not states:
+        # looser name harvest
+        states = [{"name": n, "directions": 1} for n in re.findall(r'"name"\s*:\s*"([^"]+)"', raw)]
+    return {
+        "size": {"x": int(m.group(1)), "y": int(m.group(2))},
+        "states": states,
+    }
 
 
 def extract_frame(

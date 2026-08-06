@@ -145,24 +145,42 @@ body {
 }
 .logo:hover { text-decoration: none; color: inherit; }
 
-.logo-mark {
+.logo-img {
   width: 42px;
   height: 42px;
   border-radius: 10px;
-  background: var(--grad-accent);
-  box-shadow: var(--shadow-btn-color);
+  object-fit: contain;
+  background: var(--panel);
+  border: 2px solid var(--border-strong);
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
   flex-shrink: 0;
+  box-shadow: var(--shadow-btn);
 }
 
 .logo-text {
+  margin: 0;
   font-family: var(--font-pixel);
   font-size: 0.95rem;
   font-weight: 400;
   letter-spacing: 0.02em;
   line-height: 1.25;
+  color: var(--ink);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .logo-text span { color: var(--accent); }
+
+/* Ensure logo stays readable on light topbar */
+html[data-theme="light"] .logo-text {
+  color: #17222f;
+  text-shadow: none;
+}
+html[data-theme="light"] .topbar {
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 4px 18px rgba(23, 34, 47, 0.08);
+}
 
 .search {
   flex: 1;
@@ -529,39 +547,9 @@ body {
   .wiki-page { animation: none; }
 }
 
+/* Legacy class kept as alias; real look is in tgui-chrome.css (.page-actions) */
 .page-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  margin: 0 0 14px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
-}
-
-.page-toolbar .portlet-inline {
-  gap: 6px;
-}
-
-.page-toolbar .mw-list-item > a,
-.page-toolbar a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 34px;
-  padding: 4px 10px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--panel-2);
-  color: var(--ink) !important;
-  text-decoration: none !important;
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-.page-toolbar .mw-list-item > a:hover,
-.page-toolbar a:hover {
-  border-color: var(--accent);
-  color: var(--accent) !important;
-  background: color-mix(in srgb, var(--accent) 10%, var(--panel));
+  display: none;
 }
 
 .page-head { margin-bottom: 16px; }
@@ -624,27 +612,151 @@ body {
 
 .prose ul,
 .mw-body-content ul {
+  margin: 0.4em 0 0.7em;
+  padding-left: 1.05em;
+  list-style: disc;
+}
+.prose ul ul,
+.mw-body-content ul ul {
+  margin: 0.15em 0 0.3em;
+  padding-left: 0.95em;
+  list-style: circle;
+}
+.prose ol,
+.mw-body-content ol {
+  margin: 0.4em 0 0.7em;
   padding-left: 1.2em;
 }
 .prose li,
-.mw-body-content li { margin: 0.35em 0; }
+.mw-body-content li {
+  margin: 0.16em 0;
+  padding-left: 0.1em;
+}
+
+/* Soft TOC on light panels */
+#toc,
+.toc,
+.mw-parser-output .toc {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px 10px;
+  margin: 0 0 1em;
+  color: var(--ink);
+  box-shadow: none;
+  font-size: 0.92rem;
+}
+#toc #toctitle,
+.toc #toctitle,
+.toctitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+#toctitle h2,
+.toctitle h2 {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  font-family: var(--font-body) !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  color: var(--ink) !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+.toctoggle a {
+  color: var(--link) !important;
+  font-size: 0.85rem;
+}
+#toc ul,
+.toc ul {
+  margin: 0;
+  padding-left: 1.05em;
+  list-style: none;
+}
+#toc li,
+.toc li { margin: 0.1em 0; }
+#toc a,
+.toc a { color: var(--link) !important; }
+.tocnumber {
+  color: var(--muted) !important;
+  margin-right: 0.3em;
+}
 
 .prose table,
 .mw-body-content table {
   border-collapse: collapse;
   width: 100%;
-  margin: 1em 0;
+  margin: 0.65em 0 0.9em;
+  font-size: 0.94rem;
+  background: var(--panel);
 }
 .prose th,
 .prose td,
 .mw-body-content th,
 .mw-body-content td {
   border: 1px solid var(--border);
-  padding: 8px 10px;
+  padding: 6px 8px;
   text-align: left;
+  vertical-align: top;
+  color: var(--ink) !important;
+  background: var(--panel);
 }
 .prose th,
-.mw-body-content th { background: var(--panel-2); }
+.mw-body-content th {
+  background: color-mix(in srgb, var(--accent) 14%, var(--panel-2));
+  font-weight: 700;
+  color: var(--ink) !important;
+}
+
+/* Thumbnails / framed files only — NOT inline [[File:]] icons */
+.thumb,
+.thumbinner,
+.mw-parser-output .thumb {
+  background: var(--panel) !important;
+  color: var(--ink) !important;
+  border-color: var(--border) !important;
+}
+/* Inline file icons must stay transparent (sprites over table cells) */
+.mw-file-description,
+figure[typeof*="mw:File/Frameless"],
+figure[typeof*="mw:File/Original"],
+.mw-parser-output a.mw-file-description,
+.items-table .mw-file-description,
+.items-table figure[typeof*="mw:File"] {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+.thumb a,
+.thumbinner a,
+html[data-theme="light"] .thumb a,
+html[data-theme="light"] .mw-parser-output .thumb a {
+  color: var(--link) !important;
+}
+html[data-theme="dark"] .thumb a,
+html[data-theme="dark"] .mw-parser-output .thumb a {
+  color: var(--link) !important;
+}
+.thumbcaption,
+.mw-parser-output .thumbcaption {
+  color: var(--ink) !important;
+}
+.prose td ul,
+.mw-body-content td ul {
+  margin: 0.1em 0;
+  padding-left: 1em;
+}
+.prose td li,
+.mw-body-content td li {
+  margin: 0.06em 0;
+}
 
 .prose code,
 .mw-body-content code {
@@ -788,10 +900,10 @@ body {
   border-radius: var(--radius);
   color: #fff;
   text-align: center;
-  padding: 28px 22px 30px;
+  padding: 18px 18px 16px;
   position: relative;
   overflow: hidden;
-  margin: 0 0 18px;
+  margin: 0 0 10px;
   box-shadow: var(--shadow-lift);
 }
 
@@ -833,7 +945,7 @@ body {
   font-size: clamp(0.95rem, 2.8vw, 1.35rem) !important;
   font-weight: 400 !important;
   color: #fff !important;
-  margin: 0 0 14px !important;
+  margin: 0 0 8px !important;
   padding: 0 !important;
   border: none !important;
   text-transform: none !important;
@@ -856,9 +968,9 @@ body {
   color: #fff;
   background: rgba(255, 255, 255, 0.18);
   border: 1px solid rgba(255, 255, 255, 0.4);
-  padding: 8px 14px;
+  padding: 6px 12px;
   border-radius: var(--radius-sm);
-  margin-bottom: 16px;
+  margin-bottom: 10px;
   text-transform: uppercase;
   backdrop-filter: blur(4px);
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
@@ -869,11 +981,11 @@ body {
 #ms-hero .description,
 .wiki-page .hero-card .description {
   font-family: var(--font-body);
-  font-size: 1.05rem;
-  line-height: 1.7;
+  font-size: 0.98rem;
+  line-height: 1.55;
   color: rgba(255, 255, 255, 0.95);
   max-width: 680px;
-  margin: 0 auto 18px;
+  margin: 0 auto 12px;
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
   font-weight: 400;
 }
@@ -1070,6 +1182,11 @@ body {
 .ms-tile--civ { border-color: #7f8c8d; }
 
 /* Hide default MW title on home — hero brand is enough */
+.page-Main_Page .page-head,
+.page-Заглавная_страница .page-head {
+  display: none !important;
+}
+
 .page-Main_Page .page-head .firstHeading,
 .page-Main_Page #firstHeading,
 .page-Заглавная_страница .page-head .firstHeading,
@@ -1078,14 +1195,24 @@ body.page-Заглавная_страница h1#firstHeading {
   display: none !important;
 }
 
-.page-Main_Page .page-toolbar,
-.page-Заглавная_страница .page-toolbar {
-  margin-bottom: 10px;
+.page-Main_Page .page-actions,
+.page-Заглавная_страница .page-actions {
+  margin-bottom: 0;
 }
 
 .page-Заглавная_страница #toc,
 .page-Main_Page #toc {
   display: none !important;
+}
+
+.page-Заглавная_страница .wiki-page,
+.page-Main_Page .wiki-page {
+  padding-top: 14px;
+}
+
+.page-Заглавная_страница .wiki-mainpage,
+.page-Main_Page .wiki-mainpage {
+  margin-top: 0.35em !important;
 }
 
 @media (max-width: 560px) {

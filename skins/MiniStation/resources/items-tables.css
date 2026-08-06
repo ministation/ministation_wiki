@@ -1,0 +1,653 @@
+/* Closer to SS220 TGUI palette for item tables */
+:root,
+html[data-theme="light"] {
+  --palette-saturation: 50%;
+  --palette-lightness: 50%;
+  --color-primal-fill: #e8eef7;
+  --color-primal: #17222f;
+  --color-primal-immutable: #3d6ea8;
+  --color-primary: #3d6ea8;
+  --color-primary-light: #4f82c0;
+  --color-second: color-mix(in srgb, hsla(0, 0%, 100%, 0.55), var(--color-primal-fill) 40%);
+  --color-second-fill: color-mix(in srgb, var(--color-primal-fill), white 3%);
+  --color-border: color-mix(in srgb, var(--color-primal), transparent 78%);
+  --color-text: #17222f;
+  --color-text-darker: #0f1620;
+  --color-white: #ffffff;
+  --color-red: #c43c3c;
+  --border-classic: 1px outset var(--color-border);
+  --border-radius-large: 12px;
+  --border-radius-medium: 8px;
+  --border-radius-small: 6px;
+
+  --civilian-opaque: hsl(140, calc(var(--palette-saturation) + 20%), calc(var(--palette-lightness) - 15%));
+  --civilian-primary: hsla(141, calc(var(--palette-saturation) + 20%), calc(var(--palette-lightness) - 15%), 0.75);
+  --civilian-secondary: hsla(142, calc(var(--palette-saturation) + 20%), calc(var(--palette-lightness) - 15%), 0.5);
+  --civilian-light: hsla(143, calc(var(--palette-saturation) + 20%), calc(var(--palette-lightness) - 15%), 0.25);
+  --civilian-transparent: hsla(144, calc(var(--palette-saturation) + 20%), calc(var(--palette-lightness) - 15%), 0.1);
+
+  --medical-opaque: hsl(195, calc(var(--palette-saturation) + 25%), calc(var(--palette-lightness) - 10%));
+  --medical-primary: hsla(194, calc(var(--palette-saturation) + 25%), calc(var(--palette-lightness) - 10%), 0.75);
+  --medical-secondary: hsla(193, calc(var(--palette-saturation) + 25%), calc(var(--palette-lightness) - 10%), 0.5);
+  --medical-light: hsla(192, calc(var(--palette-saturation) + 25%), calc(var(--palette-lightness) - 10%), 0.25);
+  --medical-transparent: hsla(191, calc(var(--palette-saturation) + 25%), calc(var(--palette-lightness) - 10%), 0.1);
+
+  --science-opaque: hsl(273, calc(var(--palette-saturation) + 40%), calc(var(--palette-lightness) - 15%));
+  --science-primary: hsla(274, calc(var(--palette-saturation) + 40%), calc(var(--palette-lightness) - 15%), 0.75);
+  --science-secondary: hsla(273, calc(var(--palette-saturation) + 40%), calc(var(--palette-lightness) - 15%), 0.5);
+  --science-light: hsla(272, calc(var(--palette-saturation) + 40%), calc(var(--palette-lightness) - 15%), 0.25);
+  --science-transparent: hsla(270, calc(var(--palette-saturation) + 40%), calc(var(--palette-lightness) - 15%), 0.1);
+
+  --engineer-opaque: hsl(40, calc(var(--palette-saturation) + 50%), calc(var(--palette-lightness) - 15%));
+  --engineer-primary: hsla(39, calc(var(--palette-saturation) + 50%), calc(var(--palette-lightness) - 15%), 0.75);
+  --engineer-secondary: hsla(38, calc(var(--palette-saturation) + 50%), calc(var(--palette-lightness) - 15%), 0.5);
+  --engineer-light: hsla(37, calc(var(--palette-saturation) + 50%), calc(var(--palette-lightness) - 15%), 0.25);
+  --engineer-transparent: hsla(36, calc(var(--palette-saturation) + 50%), calc(var(--palette-lightness) - 15%), 0.1);
+
+  --security-opaque: hsl(0, calc(var(--palette-saturation) + 15%), calc(var(--palette-lightness) - 8%));
+  --security-primary: hsla(0, calc(var(--palette-saturation) + 15%), calc(var(--palette-lightness) - 8%), 0.75);
+  --security-secondary: hsla(0, calc(var(--palette-saturation) + 15%), calc(var(--palette-lightness) - 8%), 0.5);
+  --security-light: hsla(0, calc(var(--palette-saturation) + 15%), calc(var(--palette-lightness) - 8%), 0.25);
+  --security-transparent: hsla(0, calc(var(--palette-saturation) + 15%), calc(var(--palette-lightness) - 8%), 0.1);
+
+  --supply-opaque: hsl(25, calc(var(--palette-saturation) + 20%), calc(var(--palette-lightness) - 10%));
+  --supply-primary: hsla(24, calc(var(--palette-saturation) + 20%), calc(var(--palette-lightness) - 10%), 0.75);
+  --supply-secondary: hsla(23, calc(var(--palette-saturation) + 20%), calc(var(--palette-lightness) - 10%), 0.5);
+  --supply-light: hsla(22, calc(var(--palette-saturation) + 20%), calc(var(--palette-lightness) - 10%), 0.25);
+  --supply-transparent: hsla(21, calc(var(--palette-saturation) + 20%), calc(var(--palette-lightness) - 10%), 0.1);
+
+  --command-opaque: hsl(210, calc(var(--palette-saturation) + 5%), calc(var(--palette-lightness) - 10%));
+  --command-primary: hsla(209, calc(var(--palette-saturation) + 5%), calc(var(--palette-lightness) - 10%), 0.75);
+  --command-secondary: hsla(208, calc(var(--palette-saturation) + 5%), calc(var(--palette-lightness) - 10%), 0.5);
+  --command-light: hsla(207, calc(var(--palette-saturation) + 5%), calc(var(--palette-lightness) - 10%), 0.25);
+  --command-transparent: hsla(206, calc(var(--palette-saturation) + 5%), calc(var(--palette-lightness) - 10%), 0.1);
+
+  --antag-opaque: hsl(345, calc(var(--palette-saturation) + 10%), calc(var(--palette-lightness) - 12%));
+  --antag-primary: hsla(344, calc(var(--palette-saturation) + 10%), calc(var(--palette-lightness) - 12%), 0.75);
+  --antag-secondary: hsla(343, calc(var(--palette-saturation) + 10%), calc(var(--palette-lightness) - 12%), 0.5);
+  --antag-light: hsla(342, calc(var(--palette-saturation) + 10%), calc(var(--palette-lightness) - 12%), 0.25);
+  --antag-transparent: hsla(341, calc(var(--palette-saturation) + 10%), calc(var(--palette-lightness) - 12%), 0.1);
+}
+
+html[data-theme="dark"] {
+  --palette-saturation: 45%;
+  --palette-lightness: 45%;
+  --color-primal-fill: #1a2230;
+  --color-primal: #e8eef6;
+  --color-primary: #4f82c0;
+  --color-primary-light: #6a9ad0;
+  --color-second: color-mix(in srgb, hsla(0, 0%, 0%, 0.07), var(--color-primal-fill) 33%);
+  --color-second-fill: color-mix(in srgb, var(--color-primal-fill), black 4.5%);
+  --color-border: color-mix(in srgb, var(--color-primal), transparent 82%);
+  --color-text: #e8eef6;
+  --color-text-darker: #c5d0de;
+  --color-red: #e85a5a;
+  --border-classic: 1px outset var(--color-border);
+
+  --engineer-opaque: hsl(40, calc(var(--palette-saturation) + 25%), calc(var(--palette-lightness) + 5%));
+  --engineer-primary: hsla(39, calc(var(--palette-saturation) + 25%), calc(var(--palette-lightness) + 5%), 0.75);
+  --engineer-secondary: hsla(38, calc(var(--palette-saturation) + 25%), calc(var(--palette-lightness) + 5%), 0.5);
+  --engineer-light: hsla(37, calc(var(--palette-saturation) + 25%), calc(var(--palette-lightness) + 5%), 0.25);
+  --engineer-transparent: hsla(36, calc(var(--palette-saturation) + 25%), calc(var(--palette-lightness) + 5%), 0.1);
+}
+
+/* Item tables: closer to TGUI look */
+.items-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0.15em;
+  border: var(--border-classic);
+  border-radius: var(--border-radius-medium);
+  background-color: var(--color-second-fill);
+  overflow: hidden;
+}
+.items-table th {
+  border: 0.2em double var(--color-border);
+  border-radius: var(--border-radius-small);
+  background-color: var(--color-second);
+  color: var(--color-text);
+  padding: 0.35em 0.4em;
+  font-weight: 700;
+}
+.items-table td {
+  background-color: var(--color-second);
+  color: var(--color-text);
+  padding: 0.4em 0.45em;
+  vertical-align: middle;
+}
+.items-table img,
+.items-table .mw-file-element {
+  max-height: 64px;
+  width: auto;
+  image-rendering: pixelated;
+}
+.items-table .mw-broken-media {
+  opacity: 0.55;
+  font-size: 0.85em;
+}
+
+/* Цвета охранного отдела */
+.colors-secure,
+.colors-Security,
+tr.colors-secure,
+tr.colors-Security {
+  background-color: var(--security-light);
+  border-color: var(--security-secondary);
+}
+.colors-secure th,
+.colors-Security th,
+tr.colors-secure th,
+tr.colors-Security th {
+  background-color: var(--security-primary);
+  border-color: var(--security-opaque);
+}
+.colors-secure td,
+.colors-Security td,
+tr.colors-secure td,
+tr.colors-Security td {
+  background-color: var(--security-transparent);
+}
+:not(.regular).colors-secure td:not(.regular):first-of-type,
+:not(.regular).colors-Security td:not(.regular):first-of-type,
+.colors-secure td.capital,
+.colors-Security td.capital,
+:not(.regular) tr.colors-secure td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Security td:not(.regular):first-of-type {
+  background-color: var(--security-light);
+  color: var(--color-text);
+  border-color: var(--security-opaque);
+}
+
+/* Цвета научного отдела */
+.colors-science,
+.colors-Science,
+tr.colors-science,
+tr.colors-Science {
+  background-color: var(--science-light);
+  border-color: var(--science-secondary);
+}
+.colors-science th,
+.colors-Science th,
+tr.colors-science th,
+tr.colors-Science th {
+  background-color: var(--science-primary);
+  border-color: var(--science-opaque);
+}
+.colors-science td,
+.colors-Science td,
+tr.colors-science td,
+tr.colors-Science td {
+  background-color: var(--science-transparent);
+}
+:not(.regular).colors-science td:not(.regular):first-of-type,
+:not(.regular).colors-Science td:not(.regular):first-of-type,
+.colors-science td.capital,
+.colors-Science td.capital,
+:not(.regular) tr.colors-science td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Science td:not(.regular):first-of-type {
+  background-color: var(--science-light);
+  color: var(--color-text);
+  border-color: var(--science-opaque);
+}
+
+/* Цвета сервисного отдела */
+.colors-service,
+.colors-Service,
+tr.colors-service,
+tr.colors-Service {
+  background-color: var(--civilian-light);
+  border-color: var(--civilian-secondary);
+}
+.colors-service th,
+.colors-Service th,
+tr.colors-service th,
+tr.colors-Service th {
+  background-color: var(--civilian-primary);
+  border-color: var(--civilian-opaque);
+}
+.colors-service td,
+.colors-Service td,
+tr.colors-service td,
+tr.colors-Service td {
+  background-color: var(--civilian-transparent);
+}
+:not(.regular).colors-service td:not(.regular):first-of-type,
+:not(.regular).colors-Service td:not(.regular):first-of-type,
+.colors-service td.capital,
+.colors-Service td.capital,
+:not(.regular) tr.colors-service td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Service td:not(.regular):first-of-type {
+  background-color: var(--civilian-light);
+  color: var(--color-text);
+  border-color: var(--civilian-opaque);
+}
+
+/* Цвета инженерного отдела */
+.colors-engine,
+.colors-Engineering,
+tr.colors-engine,
+tr.colors-Engineering {
+  background-color: var(--engineer-light);
+  border-color: var(--engineer-secondary);
+}
+.colors-engine th,
+.colors-Engineering th,
+tr.colors-engine th,
+tr.colors-Engineering th {
+  background-color: var(--engineer-primary);
+  border-color: var(--engineer-opaque);
+}
+.colors-engine td,
+.colors-Engineering td,
+tr.colors-engine td,
+tr.colors-Engineering td {
+  background-color: var(--engineer-transparent);
+}
+:not(.regular).colors-engine td:not(.regular):first-of-type,
+:not(.regular).colors-Engineering td:not(.regular):first-of-type,
+.colors-engine td.capital,
+.colors-Engineering td.capital,
+:not(.regular) tr.colors-engine td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Engineering td:not(.regular):first-of-type {
+  background-color: var(--engineer-light);
+  color: var(--color-text);
+  border-color: var(--engineer-opaque);
+}
+
+/* Цвета командного отдела */
+.colors-command,
+.colors-Command,
+tr.colors-command,
+tr.colors-Command {
+  background-color: var(--command-light);
+  border-color: var(--command-secondary);
+}
+.colors-command th,
+.colors-Command th,
+tr.colors-command th,
+tr.colors-Command th {
+  background-color: var(--command-primary);
+  border-color: var(--command-opaque);
+}
+.colors-command td,
+.colors-Command td,
+tr.colors-command td,
+tr.colors-Command td {
+  background-color: var(--command-transparent);
+}
+:not(.regular).colors-command td:not(.regular):first-of-type,
+:not(.regular).colors-Command td:not(.regular):first-of-type,
+.colors-command td.capital,
+.colors-Command td.capital,
+:not(.regular) tr.colors-command td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Command td:not(.regular):first-of-type {
+  background-color: var(--command-light);
+  color: var(--color-white);
+  border-color: var(--command-opaque);
+}
+
+/* Цвета медицинского отдела */
+.colors-medik,
+.colors-Medical,
+tr.colors-medik,
+tr.colors-Medical {
+  background-color: var(--medical-light);
+  border-color: var(--medical-secondary);
+}
+.colors-medik th,
+.colors-Medical th,
+tr.colors-medik th,
+tr.colors-Medical th {
+  background-color: var(--medical-primary);
+  border-color: var(--medical-opaque);
+}
+.colors-medik td,
+.colors-Medical td,
+tr.colors-medik td,
+tr.colors-Medical td {
+  background-color: var(--medical-transparent);
+}
+:not(.regular).colors-medik td:not(.regular):first-of-type,
+:not(.regular).colors-Medical td:not(.regular):first-of-type,
+.colors-medik td.capital,
+.colors-Medical td.capital,
+:not(.regular) tr.colors-medik td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Medical td:not(.regular):first-of-type {
+  background-color: var(--medical-light);
+  color: var(--color-text);
+  border-color: var(--medical-opaque);
+}
+
+/* Цвета снабжающего отдела */
+.colors-suply,
+.colors-Supply,
+tr.colors-suply,
+tr.colors-Supply {
+  background-color: var(--supply-light);
+  border-color: var(--supply-secondary);
+}
+.colors-suply th,
+.colors-Supply th,
+tr.colors-suply th,
+tr.colors-Supply th {
+  background-color: var(--supply-primary);
+  border-color: var(--supply-opaque);
+}
+.colors-suply td,
+.colors-Supply td,
+tr.colors-suply td,
+tr.colors-Supply td {
+  background-color: var(--supply-transparent);
+}
+:not(.regular).colors-suply td:not(.regular):first-of-type,
+:not(.regular).colors-Supply td:not(.regular):first-of-type,
+.colors-suply td.capital,
+.colors-Supply td.capital,
+:not(.regular) tr.colors-suply td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Supply td:not(.regular):first-of-type {
+  background-color: var(--supply-light);
+  color: var(--color-text);
+  border-color: var(--supply-opaque);
+}
+
+/* Цвета планетарного отдела */
+.colors-lava,
+.colors-Lavaland,
+tr.colors-lava,
+tr.colors-Lavaland {
+  background-color: var(--lavaland-light);
+  border-color: var(--lavaland-secondary);
+}
+.colors-lava th,
+.colors-Lavaland th,
+tr.colors-lava th,
+tr.colors-Lavaland th {
+  background-color: var(--lavaland-primary);
+  border-color: var(--lavaland-opaque);
+}
+.colors-lava td,
+.colors-Lavaland td,
+tr.colors-lava td,
+tr.colors-Lavaland td {
+  background-color: var(--lavaland-transparent);
+}
+:not(.regular).colors-lava td:not(.regular):first-of-type,
+:not(.regular).colors-Lavaland td:not(.regular):first-of-type,
+.colors-lava td.capital,
+.colors-Lavaland td.capital,
+:not(.regular) tr.colors-lava td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Lavaland td:not(.regular):first-of-type {
+  background-color: var(--lavaland-light);
+  color: var(--color-text);
+  border-color: var(--lavaland-opaque);
+}
+
+/* Цвета синтетического отдела */
+.colors-synth,
+.colors-Synthetic,
+tr.colors-synth,
+tr.colors-Synthetic {
+  background-color: var(--synthetic-light);
+  border-color: var(--synthetic-secondary);
+}
+.colors-synth th,
+.colors-Synthetic th,
+tr.colors-synth th,
+tr.colors-Synthetic th {
+  background-color: var(--synthetic-primary);
+  border-color: var(--synthetic-opaque);
+}
+.colors-synth td,
+.colors-Synthetic td,
+tr.colors-synth td,
+tr.colors-Synthetic td {
+  background-color: var(--synthetic-transparent);
+}
+:not(.regular).colors-synth td:not(.regular):first-of-type,
+:not(.regular).colors-Synthetic td:not(.regular):first-of-type,
+.colors-synth td.capital,
+.colors-Synthetic td.capital,
+:not(.regular) tr.colors-synth td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Synthetic td:not(.regular):first-of-type {
+  background-color: var(--synthetic-light);
+  color: var(--color-white);
+  border-color: var(--synthetic-opaque);
+}
+
+/* Цвета антагского отдела */
+.colors-antag,
+.colors-Antagonist,
+tr.colors-antag,
+tr.colors-Antagonist {
+  background-color: var(--antag-light);
+  border-color: var(--antag-secondary);
+}
+.colors-antag th,
+.colors-Antagonist th,
+tr.colors-antag th,
+tr.colors-Antagonist th {
+  background-color: var(--antag-primary);
+  border-color: var(--antag-opaque);
+}
+.colors-antag td,
+.colors-Antagonist td,
+tr.colors-antag td,
+tr.colors-Antagonist td {
+  background-color: var(--antag-transparent);
+}
+:not(.regular).colors-antag td:not(.regular):first-of-type,
+:not(.regular).colors-Antagonist td:not(.regular):first-of-type,
+.colors-antag td.capital,
+.colors-Antagonist td.capital,
+:not(.regular) tr.colors-antag td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Antagonist td:not(.regular):first-of-type {
+  background-color: var(--antag-light);
+  color: var(--color-red);
+  border-color: var(--antag-opaque);
+}
+
+/* Цвета культистского отдела */
+.colors-cult,
+.colors-Cultist,
+tr.colors-cult,
+tr.colors-Cultist {
+  background-color: var(--cult-light);
+  border-color: var(--cult-secondary);
+}
+.colors-cult th,
+.colors-Cultist th,
+tr.colors-cult th,
+tr.colors-Cultist th {
+  background-color: var(--cult-primary);
+  border-color: var(--cult-opaque);
+}
+.colors-cult td,
+.colors-Cultist td,
+tr.colors-cult td,
+tr.colors-Cultist td {
+  background-color: var(--cult-transparent);
+}
+:not(.regular).colors-cult td:not(.regular):first-of-type,
+:not(.regular).colors-Cultist td:not(.regular):first-of-type,
+.colors-cult td.capital,
+.colors-Cultist td.capital,
+:not(.regular) tr.colors-cult td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Cultist td:not(.regular):first-of-type {
+  background-color: var(--cult-light);
+  color: var(--color-red);
+  border-color: var(--cult-opaque);
+}
+
+/* Цвета ратваровского отдела */
+.colors-ratvar,
+.colors-Ratvar,
+tr.colors-ratvar,
+tr.colors-Ratvar {
+  background-color: var(--ratvar-light);
+  border-color: var(--ratvar-secondary);
+}
+.colors-ratvar th,
+.colors-Ratvar th,
+tr.colors-ratvar th,
+tr.colors-Ratvar th {
+  background-color: var(--ratvar-primary);
+  border-color: var(--ratvar-opaque);
+}
+.colors-ratvar td,
+.colors-Ratvar td,
+tr.colors-ratvar td,
+tr.colors-Ratvar td {
+  background-color: var(--ratvar-transparent);
+}
+:not(.regular).colors-ratvar td:not(.regular):first-of-type,
+:not(.regular).colors-Ratvar td:not(.regular):first-of-type,
+.colors-ratvar td.capital,
+.colors-Ratvar td.capital,
+:not(.regular) tr.colors-ratvar td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Ratvar td:not(.regular):first-of-type {
+  background-color: var(--ratvar-light);
+  color: var(--color-white);
+  border-color: var(--ratvar-opaque);
+}
+
+/* Цвета ксеноморфного отдела */
+.colors-xenom,
+.colors-Xenomorph,
+tr.colors-xenom,
+tr.colors-Xenomorph {
+  background-color: var(--special-light);
+  border-color: var(--special-secondary);
+}
+.colors-xenom th,
+.colors-Xenomorph th,
+tr.colors-xenom th,
+tr.colors-Xenomorph th {
+  background-color: var(--special-primary);
+  border-color: var(--special-opaque);
+}
+.colors-xenom td,
+.colors-Xenomorph td,
+tr.colors-xenom td,
+tr.colors-Xenomorph td {
+  background-color: var(--special-transparent);
+}
+:not(.regular).colors-xenom td:not(.regular):first-of-type,
+:not(.regular).colors-Xenomorph td:not(.regular):first-of-type,
+.colors-xenom td.capital,
+.colors-Xenomorph td.capital,
+:not(.regular) tr.colors-xenom td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Xenomorph td:not(.regular):first-of-type {
+  background-color: var(--special-light);
+  color: var(--color-white);
+  border-color: var(--special-opaque);
+}
+
+/* Цвета марининого отдела */
+.colors-marine,
+.colors-Marine,
+tr.colors-marine,
+tr.colors-Marine {
+  background-color: var(--centcom-light);
+  border-color: var(--centcom-secondary);
+}
+.colors-marine th,
+.colors-Marine th,
+tr.colors-marine th,
+tr.colors-Marine th {
+  background-color: var(--centcom-primary);
+  border-color: var(--centcom-opaque);
+}
+.colors-marine td,
+.colors-Marine td,
+tr.colors-marine td,
+tr.colors-Marine td {
+  background-color: var(--centcom-transparent);
+}
+:not(.regular).colors-marine td:not(.regular):first-of-type,
+:not(.regular).colors-Marine td:not(.regular):first-of-type,
+.colors-marine td.capital,
+.colors-Marine td.capital,
+:not(.regular) tr.colors-marine td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Marine td:not(.regular):first-of-type {
+  background-color: var(--centcom-light);
+  color: var(--color-text);
+  border-color: var(--centcom-opaque);
+}
+
+/* Цвета волшебного отдела */
+.colors-wizard,
+.colors-Wizard,
+tr.colors-wizard,
+tr.colors-Wizard {
+  background-color: var(--wizard-light);
+  border-color: var(--wizard-secondary);
+}
+.colors-wizard th,
+.colors-Wizard th,
+tr.colors-wizard th,
+tr.colors-Wizard th {
+  background-color: var(--wizard-primary);
+  border-color: var(--wizard-opaque);
+}
+.colors-wizard td,
+.colors-Wizard td,
+tr.colors-wizard td,
+tr.colors-Wizard td {
+  background-color: var(--wizard-transparent);
+}
+:not(.regular).colors-wizard td:not(.regular):first-of-type,
+:not(.regular).colors-Wizard td:not(.regular):first-of-type,
+.colors-wizard td.capital,
+.colors-Wizard td.capital,
+:not(.regular) tr.colors-wizard td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Wizard td:not(.regular):first-of-type {
+  background-color: var(--wizard-light);
+  color: var(--color-text);
+  border-color: var(--wizard-opaque);
+}
+
+/* Цвета похитнического отдела */
+.colors-abductor,
+.colors-Abductor,
+tr.colors-abductor,
+tr.colors-Abductor {
+  background-color: var(--gray-light);
+  border-color: var(--gray-secondary);
+}
+.colors-abductor th,
+.colors-Abductor th,
+tr.colors-abductor th,
+tr.colors-Abductor th {
+  background-color: var(--gray-primary);
+  border-color: var(--gray-opaque);
+}
+.colors-abductor td,
+.colors-Abductor td,
+tr.colors-abductor td,
+tr.colors-Abductor td {
+  background-color: var(--gray-transparent);
+}
+:not(.regular).colors-abductor td:not(.regular):first-of-type,
+:not(.regular).colors-Abductor td:not(.regular):first-of-type,
+.colors-abductor td.capital,
+.colors-Abductor td.capital,
+:not(.regular) tr.colors-abductor td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Abductor td:not(.regular):first-of-type {
+  background-color: var(--gray-light);
+  color: var(--color-text);
+  border-color: var(--gray-opaque);
+}
+
+/* Таблица брони и оружия */
+.weapon-table td,
+.armor-table {
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Последний столбец */
+.weapon-table td:last-of-type,
+.armor-table td:last-of-type {
+  text-align: left;
+  font-weight: unset;
+}

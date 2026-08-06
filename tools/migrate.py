@@ -261,7 +261,13 @@ def md_to_wikitext(body: str) -> str:
     return text.strip() + "\n"
 
 
-def page_title_from_path(path: Path) -> str:
+def page_title_from_path(path: Path, meta: dict | None = None) -> str:
+    meta = meta or {}
+    # Explicit MediaWiki title (for Russian / spaced names)
+    for key in ("page", "mw_title"):
+        raw = meta.get(key)
+        if isinstance(raw, str) and raw.strip():
+            return raw.strip()
     stem = path.stem
     # Russian MediaWiki main page is «Заглавная страница», not «Main Page»
     if stem in ("Main_Page", "Main Page", "Заглавная_страница"):
@@ -339,7 +345,7 @@ def migrate(*, seed_remote: bool = False, apply_remote: bool = True) -> None:
     for path in files:
         raw = path.read_text(encoding="utf-8")
         meta, body = parse_frontmatter(raw)
-        title = page_title_from_path(path)
+        title = page_title_from_path(path, meta)
         text = build_page(meta, body)
         edit_page(title, text)
 

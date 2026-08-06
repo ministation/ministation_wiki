@@ -1,0 +1,747 @@
+/* Hide noscript only elements */
+.client-js *.noscript, .invisible {
+  display: none;
+}
+
+/**
+ * MARK: MainPage/Content
+ */
+.wiki-mainpage {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75em;
+}
+
+.wiki-mainpage-column {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 20rem;
+	gap: 0.75em;
+}
+
+/**
+ * MARK: MainPage/Splash
+ */
+.paradise-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 900px;
+  background-color: var(--color-second);
+  border: var(--border-classic);
+  border-radius: var(--border-radius-large);
+  backdrop-filter: var(--blur-default);
+}
+
+.paradise-logo a img {
+  width: 100%;
+  height: auto;
+}
+
+.paradise-welcome {
+  display: inline-flex;
+  text-align: center;
+  font-weight: bold;
+  padding: 0 1em;
+  margin: -1.5em 0.5em 0.5em 0.5em;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border-radius: var(--border-radius-large);
+}
+
+.paradise-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.paradise-info-string {
+  overflow: hidden;
+  display: flex;
+  max-width: 90%;
+  margin-bottom: 0.25em;
+  background-color: var(--color-second);
+  border: var(--border-classic);
+  border-top: 0;
+  border-radius: 0 0 var(--border-radius-large) var(--border-radius-large);
+  box-shadow: inset 0px 5px 5px -5px rgba(0, 0, 0, 0.2);
+  backdrop-filter: var(--blur-default);
+}
+
+.paradise-info-string span:not([class]) {
+  padding: 0.5em 0.75em;
+  border-right: var(--border-classic);
+  border-left: var(--border-classic);
+
+  @media (max-width: 719px) {
+    display: none;
+  }
+}
+
+.paradise-info-string .paradise-info-link {
+  min-width: 3em;
+
+  @media (max-width: 719px) {
+    min-width: 10em;
+    height: 2.5em;
+  }
+}
+
+.paradise-info-string .paradise-info-link:first-of-type {
+  @media (max-width: 719px) {
+    border-right: var(--border-classic);
+  }
+}
+
+.paradise-info-string .paradise-info-link a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--color-text-semi-translucent) !important;
+  transition: color var(--transition-time), background-color var(--transition-time);
+}
+
+.paradise-info-string .paradise-info-link a:hover {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text) !important;
+}
+
+.paradise-info-string .paradise-info-link a:after {
+  content: "";
+  font: unset;
+
+  @media (min-width: 720px) {
+    display: none;
+  }
+}
+
+.paradise-info-string .paradise-info-link:first-of-type a:after {
+  @media (max-width: 719px) {
+    content: "Discord";
+    margin-left: 1em;
+  }
+}
+
+.paradise-info-string .paradise-info-link:last-of-type a:before {
+  @media (max-width: 719px) {
+    content: "GitHub";
+    margin-right: 1em;
+  }
+}
+
+.paradise-info-string .paradise-info-link a i {
+  font-size: 1.25em;
+}
+
+/**
+ * MARK: Типы урона
+ */
+.brute {
+  color: var(--color-red);
+  font-weight: bold;
+}
+
+.burn {
+  color: var(--color-orange);
+  font-weight: bold;
+}
+
+.oxygen {
+  color: var(--color-blue);
+  font-weight: bold;
+}
+
+.toxic {
+  color: var(--color-green);
+  font-weight: bold;
+}
+
+.gene {
+  color: var(--color-purple);
+  font-weight: bold;
+}
+
+.electric {
+  color: var(--color-teal);
+  font-weight: bold;
+}
+
+/**
+ * MARK: JSLink
+ */
+.jslink {
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.66em;
+  padding: 0.25em 0.5em;
+  margin-left: 0.5em;
+  background-color: var(--color-primary);
+  color: var(--color-white) !important;
+  border-radius: var(--border-radius-small);
+  transition: background-color var(--transition-time);
+}
+
+.jslink:hover {
+  background-color: var(--color-primary-light);
+}
+
+/* Стиль таблиц с предметами и т.п. */
+.items-table {
+  width: 100%;
+  border: var(--border-classic);
+  border-radius: var(--border-radius-medium);
+  background-color: var(--color-second-fill);
+}
+
+.items-table th {
+  border: 0.2em double var(--color-border);
+  border-radius: var(--border-radius-small);
+  background-color: var(--color-second);
+  color: var(--color-text);
+  padding: 0.2em;
+}
+
+.items-table td {
+  background-color: var(--color-second);
+  color: var(--color-text);
+  padding: 0.2em;
+}
+
+.items-table:not(.regular) td:not(.regular):first-of-type,
+td.capital {
+  background-color: var(--color-second);
+  font-weight: bold;
+  color: var(--color-text);
+  border: var(--border-classic);
+  border-radius: var(--border-radius-small);
+  text-align: center;
+}
+
+/* Цвета охранного отдела */
+.colors-secure,
+.colors-Security,
+tr.colors-secure,
+tr.colors-Security {
+  background-color: var(--security-light);
+  border-color: var(--security-secondary);
+}
+.colors-secure th,
+.colors-Security th,
+tr.colors-secure th,
+tr.colors-Security th {
+  background-color: var(--security-primary);
+  border-color: var(--security-opaque);
+}
+.colors-secure td,
+.colors-Security td,
+tr.colors-secure td,
+tr.colors-Security td {
+  background-color: var(--security-transparent);
+}
+:not(.regular).colors-secure td:not(.regular):first-of-type,
+:not(.regular).colors-Security td:not(.regular):first-of-type,
+.colors-secure td.capital,
+.colors-Security td.capital,
+:not(.regular) tr.colors-secure td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Security td:not(.regular):first-of-type {
+  background-color: var(--security-light);
+  color: var(--color-text);
+  border-color: var(--security-opaque);
+}
+
+/* Цвета научного отдела */
+.colors-science,
+.colors-Science,
+tr.colors-science,
+tr.colors-Science {
+  background-color: var(--science-light);
+  border-color: var(--science-secondary);
+}
+.colors-science th,
+.colors-Science th,
+tr.colors-science th,
+tr.colors-Science th {
+  background-color: var(--science-primary);
+  border-color: var(--science-opaque);
+}
+.colors-science td,
+.colors-Science td,
+tr.colors-science td,
+tr.colors-Science td {
+  background-color: var(--science-transparent);
+}
+:not(.regular).colors-science td:not(.regular):first-of-type,
+:not(.regular).colors-Science td:not(.regular):first-of-type,
+.colors-science td.capital,
+.colors-Science td.capital,
+:not(.regular) tr.colors-science td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Science td:not(.regular):first-of-type {
+  background-color: var(--science-light);
+  color: var(--color-text);
+  border-color: var(--science-opaque);
+}
+
+/* Цвета сервисного отдела */
+.colors-service,
+.colors-Service,
+tr.colors-service,
+tr.colors-Service {
+  background-color: var(--civilian-light);
+  border-color: var(--civilian-secondary);
+}
+.colors-service th,
+.colors-Service th,
+tr.colors-service th,
+tr.colors-Service th {
+  background-color: var(--civilian-primary);
+  border-color: var(--civilian-opaque);
+}
+.colors-service td,
+.colors-Service td,
+tr.colors-service td,
+tr.colors-Service td {
+  background-color: var(--civilian-transparent);
+}
+:not(.regular).colors-service td:not(.regular):first-of-type,
+:not(.regular).colors-Service td:not(.regular):first-of-type,
+.colors-service td.capital,
+.colors-Service td.capital,
+:not(.regular) tr.colors-service td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Service td:not(.regular):first-of-type {
+  background-color: var(--civilian-light);
+  color: var(--color-text);
+  border-color: var(--civilian-opaque);
+}
+
+/* Цвета инженерного отдела */
+.colors-engine,
+.colors-Engineering,
+tr.colors-engine,
+tr.colors-Engineering {
+  background-color: var(--engineer-light);
+  border-color: var(--engineer-secondary);
+}
+.colors-engine th,
+.colors-Engineering th,
+tr.colors-engine th,
+tr.colors-Engineering th {
+  background-color: var(--engineer-primary);
+  border-color: var(--engineer-opaque);
+}
+.colors-engine td,
+.colors-Engineering td,
+tr.colors-engine td,
+tr.colors-Engineering td {
+  background-color: var(--engineer-transparent);
+}
+:not(.regular).colors-engine td:not(.regular):first-of-type,
+:not(.regular).colors-Engineering td:not(.regular):first-of-type,
+.colors-engine td.capital,
+.colors-Engineering td.capital,
+:not(.regular) tr.colors-engine td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Engineering td:not(.regular):first-of-type {
+  background-color: var(--engineer-light);
+  color: var(--color-text);
+  border-color: var(--engineer-opaque);
+}
+
+/* Цвета командного отдела */
+.colors-command,
+.colors-Command,
+tr.colors-command,
+tr.colors-Command {
+  background-color: var(--command-light);
+  border-color: var(--command-secondary);
+}
+.colors-command th,
+.colors-Command th,
+tr.colors-command th,
+tr.colors-Command th {
+  background-color: var(--command-primary);
+  border-color: var(--command-opaque);
+}
+.colors-command td,
+.colors-Command td,
+tr.colors-command td,
+tr.colors-Command td {
+  background-color: var(--command-transparent);
+}
+:not(.regular).colors-command td:not(.regular):first-of-type,
+:not(.regular).colors-Command td:not(.regular):first-of-type,
+.colors-command td.capital,
+.colors-Command td.capital,
+:not(.regular) tr.colors-command td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Command td:not(.regular):first-of-type {
+  background-color: var(--command-light);
+  color: var(--color-white);
+  border-color: var(--command-opaque);
+}
+
+/* Цвета медицинского отдела */
+.colors-medik,
+.colors-Medical,
+tr.colors-medik,
+tr.colors-Medical {
+  background-color: var(--medical-light);
+  border-color: var(--medical-secondary);
+}
+.colors-medik th,
+.colors-Medical th,
+tr.colors-medik th,
+tr.colors-Medical th {
+  background-color: var(--medical-primary);
+  border-color: var(--medical-opaque);
+}
+.colors-medik td,
+.colors-Medical td,
+tr.colors-medik td,
+tr.colors-Medical td {
+  background-color: var(--medical-transparent);
+}
+:not(.regular).colors-medik td:not(.regular):first-of-type,
+:not(.regular).colors-Medical td:not(.regular):first-of-type,
+.colors-medik td.capital,
+.colors-Medical td.capital,
+:not(.regular) tr.colors-medik td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Medical td:not(.regular):first-of-type {
+  background-color: var(--medical-light);
+  color: var(--color-text);
+  border-color: var(--medical-opaque);
+}
+
+/* Цвета снабжающего отдела */
+.colors-suply,
+.colors-Supply,
+tr.colors-suply,
+tr.colors-Supply {
+  background-color: var(--supply-light);
+  border-color: var(--supply-secondary);
+}
+.colors-suply th,
+.colors-Supply th,
+tr.colors-suply th,
+tr.colors-Supply th {
+  background-color: var(--supply-primary);
+  border-color: var(--supply-opaque);
+}
+.colors-suply td,
+.colors-Supply td,
+tr.colors-suply td,
+tr.colors-Supply td {
+  background-color: var(--supply-transparent);
+}
+:not(.regular).colors-suply td:not(.regular):first-of-type,
+:not(.regular).colors-Supply td:not(.regular):first-of-type,
+.colors-suply td.capital,
+.colors-Supply td.capital,
+:not(.regular) tr.colors-suply td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Supply td:not(.regular):first-of-type {
+  background-color: var(--supply-light);
+  color: var(--color-text);
+  border-color: var(--supply-opaque);
+}
+
+/* Цвета планетарного отдела */
+.colors-lava,
+.colors-Lavaland,
+tr.colors-lava,
+tr.colors-Lavaland {
+  background-color: var(--lavaland-light);
+  border-color: var(--lavaland-secondary);
+}
+.colors-lava th,
+.colors-Lavaland th,
+tr.colors-lava th,
+tr.colors-Lavaland th {
+  background-color: var(--lavaland-primary);
+  border-color: var(--lavaland-opaque);
+}
+.colors-lava td,
+.colors-Lavaland td,
+tr.colors-lava td,
+tr.colors-Lavaland td {
+  background-color: var(--lavaland-transparent);
+}
+:not(.regular).colors-lava td:not(.regular):first-of-type,
+:not(.regular).colors-Lavaland td:not(.regular):first-of-type,
+.colors-lava td.capital,
+.colors-Lavaland td.capital,
+:not(.regular) tr.colors-lava td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Lavaland td:not(.regular):first-of-type {
+  background-color: var(--lavaland-light);
+  color: var(--color-text);
+  border-color: var(--lavaland-opaque);
+}
+
+/* Цвета синтетического отдела */
+.colors-synth,
+.colors-Synthetic,
+tr.colors-synth,
+tr.colors-Synthetic {
+  background-color: var(--synthetic-light);
+  border-color: var(--synthetic-secondary);
+}
+.colors-synth th,
+.colors-Synthetic th,
+tr.colors-synth th,
+tr.colors-Synthetic th {
+  background-color: var(--synthetic-primary);
+  border-color: var(--synthetic-opaque);
+}
+.colors-synth td,
+.colors-Synthetic td,
+tr.colors-synth td,
+tr.colors-Synthetic td {
+  background-color: var(--synthetic-transparent);
+}
+:not(.regular).colors-synth td:not(.regular):first-of-type,
+:not(.regular).colors-Synthetic td:not(.regular):first-of-type,
+.colors-synth td.capital,
+.colors-Synthetic td.capital,
+:not(.regular) tr.colors-synth td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Synthetic td:not(.regular):first-of-type {
+  background-color: var(--synthetic-light);
+  color: var(--color-white);
+  border-color: var(--synthetic-opaque);
+}
+
+/* Цвета антагского отдела */
+.colors-antag,
+.colors-Antagonist,
+tr.colors-antag,
+tr.colors-Antagonist {
+  background-color: var(--antag-light);
+  border-color: var(--antag-secondary);
+}
+.colors-antag th,
+.colors-Antagonist th,
+tr.colors-antag th,
+tr.colors-Antagonist th {
+  background-color: var(--antag-primary);
+  border-color: var(--antag-opaque);
+}
+.colors-antag td,
+.colors-Antagonist td,
+tr.colors-antag td,
+tr.colors-Antagonist td {
+  background-color: var(--antag-transparent);
+}
+:not(.regular).colors-antag td:not(.regular):first-of-type,
+:not(.regular).colors-Antagonist td:not(.regular):first-of-type,
+.colors-antag td.capital,
+.colors-Antagonist td.capital,
+:not(.regular) tr.colors-antag td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Antagonist td:not(.regular):first-of-type {
+  background-color: var(--antag-light);
+  color: var(--color-red);
+  border-color: var(--antag-opaque);
+}
+
+/* Цвета культистского отдела */
+.colors-cult,
+.colors-Cultist,
+tr.colors-cult,
+tr.colors-Cultist {
+  background-color: var(--cult-light);
+  border-color: var(--cult-secondary);
+}
+.colors-cult th,
+.colors-Cultist th,
+tr.colors-cult th,
+tr.colors-Cultist th {
+  background-color: var(--cult-primary);
+  border-color: var(--cult-opaque);
+}
+.colors-cult td,
+.colors-Cultist td,
+tr.colors-cult td,
+tr.colors-Cultist td {
+  background-color: var(--cult-transparent);
+}
+:not(.regular).colors-cult td:not(.regular):first-of-type,
+:not(.regular).colors-Cultist td:not(.regular):first-of-type,
+.colors-cult td.capital,
+.colors-Cultist td.capital,
+:not(.regular) tr.colors-cult td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Cultist td:not(.regular):first-of-type {
+  background-color: var(--cult-light);
+  color: var(--color-red);
+  border-color: var(--cult-opaque);
+}
+
+/* Цвета ратваровского отдела */
+.colors-ratvar,
+.colors-Ratvar,
+tr.colors-ratvar,
+tr.colors-Ratvar {
+  background-color: var(--ratvar-light);
+  border-color: var(--ratvar-secondary);
+}
+.colors-ratvar th,
+.colors-Ratvar th,
+tr.colors-ratvar th,
+tr.colors-Ratvar th {
+  background-color: var(--ratvar-primary);
+  border-color: var(--ratvar-opaque);
+}
+.colors-ratvar td,
+.colors-Ratvar td,
+tr.colors-ratvar td,
+tr.colors-Ratvar td {
+  background-color: var(--ratvar-transparent);
+}
+:not(.regular).colors-ratvar td:not(.regular):first-of-type,
+:not(.regular).colors-Ratvar td:not(.regular):first-of-type,
+.colors-ratvar td.capital,
+.colors-Ratvar td.capital,
+:not(.regular) tr.colors-ratvar td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Ratvar td:not(.regular):first-of-type {
+  background-color: var(--ratvar-light);
+  color: var(--color-white);
+  border-color: var(--ratvar-opaque);
+}
+
+/* Цвета ксеноморфного отдела */
+.colors-xenom,
+.colors-Xenomorph,
+tr.colors-xenom,
+tr.colors-Xenomorph {
+  background-color: var(--special-light);
+  border-color: var(--special-secondary);
+}
+.colors-xenom th,
+.colors-Xenomorph th,
+tr.colors-xenom th,
+tr.colors-Xenomorph th {
+  background-color: var(--special-primary);
+  border-color: var(--special-opaque);
+}
+.colors-xenom td,
+.colors-Xenomorph td,
+tr.colors-xenom td,
+tr.colors-Xenomorph td {
+  background-color: var(--special-transparent);
+}
+:not(.regular).colors-xenom td:not(.regular):first-of-type,
+:not(.regular).colors-Xenomorph td:not(.regular):first-of-type,
+.colors-xenom td.capital,
+.colors-Xenomorph td.capital,
+:not(.regular) tr.colors-xenom td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Xenomorph td:not(.regular):first-of-type {
+  background-color: var(--special-light);
+  color: var(--color-white);
+  border-color: var(--special-opaque);
+}
+
+/* Цвета марининого отдела */
+.colors-marine,
+.colors-Marine,
+tr.colors-marine,
+tr.colors-Marine {
+  background-color: var(--centcom-light);
+  border-color: var(--centcom-secondary);
+}
+.colors-marine th,
+.colors-Marine th,
+tr.colors-marine th,
+tr.colors-Marine th {
+  background-color: var(--centcom-primary);
+  border-color: var(--centcom-opaque);
+}
+.colors-marine td,
+.colors-Marine td,
+tr.colors-marine td,
+tr.colors-Marine td {
+  background-color: var(--centcom-transparent);
+}
+:not(.regular).colors-marine td:not(.regular):first-of-type,
+:not(.regular).colors-Marine td:not(.regular):first-of-type,
+.colors-marine td.capital,
+.colors-Marine td.capital,
+:not(.regular) tr.colors-marine td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Marine td:not(.regular):first-of-type {
+  background-color: var(--centcom-light);
+  color: var(--color-text);
+  border-color: var(--centcom-opaque);
+}
+
+/* Цвета волшебного отдела */
+.colors-wizard,
+.colors-Wizard,
+tr.colors-wizard,
+tr.colors-Wizard {
+  background-color: var(--wizard-light);
+  border-color: var(--wizard-secondary);
+}
+.colors-wizard th,
+.colors-Wizard th,
+tr.colors-wizard th,
+tr.colors-Wizard th {
+  background-color: var(--wizard-primary);
+  border-color: var(--wizard-opaque);
+}
+.colors-wizard td,
+.colors-Wizard td,
+tr.colors-wizard td,
+tr.colors-Wizard td {
+  background-color: var(--wizard-transparent);
+}
+:not(.regular).colors-wizard td:not(.regular):first-of-type,
+:not(.regular).colors-Wizard td:not(.regular):first-of-type,
+.colors-wizard td.capital,
+.colors-Wizard td.capital,
+:not(.regular) tr.colors-wizard td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Wizard td:not(.regular):first-of-type {
+  background-color: var(--wizard-light);
+  color: var(--color-text);
+  border-color: var(--wizard-opaque);
+}
+
+/* Цвета похитнического отдела */
+.colors-abductor,
+.colors-Abductor,
+tr.colors-abductor,
+tr.colors-Abductor {
+  background-color: var(--gray-light);
+  border-color: var(--gray-secondary);
+}
+.colors-abductor th,
+.colors-Abductor th,
+tr.colors-abductor th,
+tr.colors-Abductor th {
+  background-color: var(--gray-primary);
+  border-color: var(--gray-opaque);
+}
+.colors-abductor td,
+.colors-Abductor td,
+tr.colors-abductor td,
+tr.colors-Abductor td {
+  background-color: var(--gray-transparent);
+}
+:not(.regular).colors-abductor td:not(.regular):first-of-type,
+:not(.regular).colors-Abductor td:not(.regular):first-of-type,
+.colors-abductor td.capital,
+.colors-Abductor td.capital,
+:not(.regular) tr.colors-abductor td:not(.regular):first-of-type,
+:not(.regular) tr.colors-Abductor td:not(.regular):first-of-type {
+  background-color: var(--gray-light);
+  color: var(--color-text);
+  border-color: var(--gray-opaque);
+}
+
+/* Таблица брони и оружия */
+.weapon-table td,
+.armor-table {
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Последний столбец */
+.weapon-table td:last-of-type,
+.armor-table td:last-of-type {
+  text-align: left;
+  font-weight: unset;
+}

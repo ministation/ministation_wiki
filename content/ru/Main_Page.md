@@ -7,8 +7,6 @@ categories:
 __NOTOC__
 __NOEDITSECTION__
 
-<div>{{Mainpage/splash}}</div>
-
 <div class="wiki-mainpage" style="margin: 0.75em 0;">
   <div class="wiki-mainpage-column">
     <div>{{MainPage/Baby}}</div>
@@ -20,6 +18,5 @@ __NOEDITSECTION__
     <div>{{MainPage/Jobs}}</div>
     <div>{{MainPage/Antags}}</div>
     <div>{{MainPage/Items}}</div>
-    <div>{{MainPage/Pepegas}}</div>
   </div>
 </div>

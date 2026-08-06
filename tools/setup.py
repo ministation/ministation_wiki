@@ -604,8 +604,68 @@ $wgEnableUploads = true;
 $wgUseInstantCommons = false;
 $wgMainPage = 'Заглавная страница';
 
+# Site logo — same asset as ministation.ru (/static/logo.png)
+$wgLogos = [
+	'1x' => "$wgScriptPath/skins/MiniStation/resources/logo.png",
+	'icon' => "$wgScriptPath/skins/MiniStation/resources/logo.png",
+];
+$wgLogo = "$wgScriptPath/skins/MiniStation/resources/logo.png";
+$wgFavicon = "$wgScriptPath/skins/MiniStation/resources/favicon.ico";
+
 # Prefer UTF-8 / Russian search niceties
 $wgCapitalLinks = true;
+
+# --- Permissions: only granted editors (and staff) can write ---
+# Anonymous
+$wgGroupPermissions['*']['edit'] = false;
+$wgGroupPermissions['*']['createpage'] = false;
+$wgGroupPermissions['*']['createtalk'] = false;
+$wgGroupPermissions['*']['upload'] = false;
+$wgGroupPermissions['*']['writeapi'] = false;
+$wgGroupPermissions['*']['createaccount'] = false; // accounts via staff only
+
+# Registered users — read-only until added to «editor»
+$wgGroupPermissions['user']['edit'] = false;
+$wgGroupPermissions['user']['createpage'] = false;
+$wgGroupPermissions['user']['createtalk'] = false;
+$wgGroupPermissions['user']['upload'] = false;
+$wgGroupPermissions['user']['reupload'] = false;
+$wgGroupPermissions['user']['reupload-shared'] = false;
+$wgGroupPermissions['user']['move'] = false;
+$wgGroupPermissions['user']['move-subpages'] = false;
+$wgGroupPermissions['user']['move-rootuserpages'] = false;
+$wgGroupPermissions['user']['minoredit'] = false;
+$wgGroupPermissions['user']['purge'] = false;
+$wgGroupPermissions['user']['sendemail'] = false;
+
+$wgGroupPermissions['autoconfirmed']['edit'] = false;
+$wgGroupPermissions['autoconfirmed']['createpage'] = false;
+$wgGroupPermissions['autoconfirmed']['upload'] = false;
+$wgGroupPermissions['autoconfirmed']['move'] = false;
+
+# Explicit editor role (assign via Special:UserRights)
+$wgGroupPermissions['editor']['read'] = true;
+$wgGroupPermissions['editor']['edit'] = true;
+$wgGroupPermissions['editor']['createpage'] = true;
+$wgGroupPermissions['editor']['createtalk'] = true;
+$wgGroupPermissions['editor']['upload'] = true;
+$wgGroupPermissions['editor']['reupload'] = true;
+$wgGroupPermissions['editor']['move'] = true;
+$wgGroupPermissions['editor']['move-subpages'] = true;
+$wgGroupPermissions['editor']['minoredit'] = true;
+$wgGroupPermissions['editor']['patrol'] = true;
+$wgGroupPermissions['editor']['writeapi'] = true;
+$wgGroupPermissions['editor']['editmyusercss'] = true;
+$wgGroupPermissions['editor']['editmyuserjs'] = true;
+$wgGroupPermissions['editor']['editmyuserjson'] = true;
+
+# Staff can grant/revoke editor
+$wgAddGroups['sysop'][] = 'editor';
+$wgRemoveGroups['sysop'][] = 'editor';
+$wgAddGroups['bureaucrat'][] = 'editor';
+$wgRemoveGroups['bureaucrat'][] = 'editor';
+$wgAddGroups['bureaucrat'][] = 'sysop';
+$wgRemoveGroups['bureaucrat'][] = 'sysop';
 
 # Styles: inline skin.css so php -S / RL cannot leave the wiki unstyled
 $wgHooks['BeforePageDisplay'][] = static function ( $out, $skin ): void {{
@@ -616,6 +676,8 @@ $wgHooks['BeforePageDisplay'][] = static function ( $out, $skin ): void {{
 	$cssFiles = [
 		'skin.css',
 		'mainpage-widgets.css',
+		'items-tables.css',
+		'tgui-chrome.css',
 	];
 	foreach ( $cssFiles as $cssFile ) {{
 		$cssPath = "$IP/skins/MiniStation/resources/" . $cssFile;
@@ -627,8 +689,19 @@ $wgHooks['BeforePageDisplay'][] = static function ( $out, $skin ): void {{
 		}}
 	}}
 	$base = rtrim( (string)$wgScriptPath, '/' ) . '/skins/MiniStation/resources/';
-	$out->addStyle( $base . 'skin.css?v=20260802h', 'screen' );
-	$out->addStyle( $base . 'mainpage-widgets.css?v=20260802a', 'screen' );
+	$out->addStyle( $base . 'skin.css?v=20260806a', 'screen' );
+	$out->addStyle( $base . 'mainpage-widgets.css?v=20260806a', 'screen' );
+	$out->addStyle( $base . 'items-tables.css?v=20260806a', 'screen' );
+	$out->addStyle( $base . 'tgui-chrome.css?v=20260806a', 'screen' );
+	// Pixel font like ministation.ru (do not rely only on skin.js)
+	$out->addHeadItem(
+		'ms-fonts',
+		'<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700&family=Press+Start+2P&display=swap">'
+	);
+	$out->addHeadItem(
+		'ms-favicon',
+		'<link rel="icon" href="' . htmlspecialchars( $base . 'favicon.ico' ) . '">'
+	);
 }};
 
 # Home hero (real HTML — never put <a> blocks in wikitext)
