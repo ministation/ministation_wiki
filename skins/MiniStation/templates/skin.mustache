@@ -73,9 +73,11 @@
 </div>
 
 <footer class="footer">
-	<p>Вики <strong>Мини-станции</strong> · как на <a href="https://ministation.ru">ministation.ru</a></p>
-	{{#data-footer}}
-		{{#data-places}}{{>FooterList}}{{/data-places}}
-		{{#data-icons}}{{>FooterList}}{{/data-icons}}
-	{{/data-footer}}
+	<div class="footer-inner">
+		<p>Вики <strong>Мини-станции</strong> · как на <a href="https://ministation.ru">ministation.ru</a></p>
+		{{#data-footer}}
+			{{#data-places}}{{>FooterList}}{{/data-places}}
+			{{#data-icons}}{{>FooterList}}{{/data-icons}}
+		{{/data-footer}}
+	</div>
 </footer>
