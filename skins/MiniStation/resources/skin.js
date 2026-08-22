@@ -37,9 +37,55 @@
       apply(next);
     });
   }
+  function visitorKey() {
+    var key = "ms-wiki-vid";
+    var visitor = null;
+    try {
+      visitor = localStorage.getItem(key);
+    } catch (e) {}
+    if (!visitor) {
+      visitor =
+        (crypto.randomUUID && crypto.randomUUID()) ||
+        String(Date.now()) + Math.random().toString(16).slice(2);
+      try {
+        localStorage.setItem(key, visitor);
+      } catch (e) {}
+    }
+    return String(visitor);
+  }
+
+  function trackVisit() {
+    try {
+      var path = location.pathname + location.search;
+      if (path.indexOf("load.php") !== -1 || path.indexOf("/api.php") !== -1) {
+        return;
+      }
+      var payload = JSON.stringify({
+        path: path.slice(0, 512),
+        visitor_key: visitorKey().slice(0, 64),
+      });
+      var url = "https://ministation.ru/api/wiki/visit";
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(url, new Blob([payload], { type: "text/plain" }));
+        return;
+      }
+      fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: payload,
+        keepalive: true,
+        mode: "cors",
+      }).catch(function () {});
+    } catch (e) {}
+  }
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", bind);
+    document.addEventListener("DOMContentLoaded", function () {
+      bind();
+      trackVisit();
+    });
   } else {
     bind();
+    trackVisit();
   }
 })();
