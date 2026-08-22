@@ -54,12 +54,37 @@
     return String(visitor);
   }
 
+  function recentlyTracked() {
+    try {
+      var at = Number(sessionStorage.getItem("ms-wiki-hit-at") || 0);
+      return at && Date.now() - at < 8000;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function markTracked() {
+    try {
+      sessionStorage.setItem("ms-wiki-hit-at", String(Date.now()));
+    } catch (e) {}
+  }
+
   function trackVisit() {
     try {
+      if (window.__msWikiVisitSent) return;
+      if (document.visibilityState === "hidden") return;
       var path = location.pathname + location.search;
-      if (path.indexOf("load.php") !== -1 || path.indexOf("/api.php") !== -1) {
+      if (
+        path.indexOf("load.php") !== -1 ||
+        path.indexOf("/api.php") !== -1 ||
+        path.indexOf("action=raw") !== -1 ||
+        path.indexOf("action=render") !== -1
+      ) {
         return;
       }
+      if (recentlyTracked()) return;
+      window.__msWikiVisitSent = true;
+      markTracked();
       var payload = JSON.stringify({
         path: path.slice(0, 512),
         visitor_key: visitorKey().slice(0, 64),
@@ -79,13 +104,17 @@
     } catch (e) {}
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", function () {
-      bind();
-      trackVisit();
-    });
-  } else {
+  function start() {
     bind();
-    trackVisit();
+    setTimeout(trackVisit, 400);
+  }
+
+  if (window.__msWikiSkinInit) return;
+  window.__msWikiSkinInit = true;
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", start);
+  } else {
+    start();
   }
 })();
